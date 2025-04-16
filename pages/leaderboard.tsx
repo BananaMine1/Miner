@@ -8,10 +8,12 @@ interface Player {
   wallet: string;
   total_earned: number;
   hashrate: number;
-  players: {
+  players: Array<{
     username: string;
     avatar_url: string;
-  };
+  }>;
+  username?: string;
+  avatar_url?: string;
 }
 
 export default function Leaderboard() {
@@ -39,8 +41,9 @@ export default function Leaderboard() {
       wallet: entry.wallet,
       total_earned: entry.total_earned,
       hashrate: entry.hashrate,
-      username: entry.players?.username || 'Unknown',
-      avatar_url: entry.players?.avatar_url || null,
+      username: entry.players?.[0]?.username || 'Unknown',
+      avatar_url: entry.players?.[0]?.avatar_url || null,
+      players: entry.players,
     }));
   
     setPlayers((prev) => [...prev, ...merged] as Player[]);
@@ -81,28 +84,28 @@ export default function Leaderboard() {
         {/* 🥇🥈🥉 Top 3 Players */}
         <div className="absolute top-[19.5%] left-[20%] text-center w-[12%]">
           <div className="text-yellow-300 font-bold text-sm mb-1">#2</div>
-          {topThree[1]?.players?.avatar_url && (
-            <img src={topThree[1].players.avatar_url} className="mx-auto w-24 h-24 rounded-full border border-yellow-300 mb-1" />
+          {topThree[1]?.avatar_url && (
+            <img src={topThree[1].avatar_url} className="mx-auto w-24 h-24 rounded-full border border-yellow-300 mb-1" />
           )}
-          <div className="text-lg font-bold">{topThree[1]?.players?.username}</div>
+          <div className="text-lg font-bold">{topThree[1]?.username}</div>
           <div className="text-xs text-yellow-100">{topThree[1]?.total_earned.toFixed(2)} $BNANA</div>
         </div>
 
         <div className="absolute top-[19.5%] left-[39.63%] text-center w-[12%]">
           <div className="text-yellow-300 font-bold text-sm mb-1">#1</div>
-          {topThree[0]?.players?.avatar_url && (
-            <img src={topThree[0].players.avatar_url} className="mx-auto w-24 h-24 rounded-full border border-yellow-300 mb-1" />
+          {topThree[0]?.avatar_url && (
+            <img src={topThree[0].avatar_url} className="mx-auto w-24 h-24 rounded-full border border-yellow-300 mb-1" />
           )}
-          <div className="text-lg font-bold">{topThree[0]?.players?.username}</div>
+          <div className="text-lg font-bold">{topThree[0]?.username}</div>
           <div className="text-xs text-yellow-100">{topThree[0]?.total_earned.toFixed(2)} $BNANA</div>
         </div>
 
         <div className="absolute top-[19.5%] left-[58.8%] text-center w-[12%]">
           <div className="text-yellow-300 font-bold text-sm mb-1">#3</div>
-          {topThree[2]?.players?.avatar_url && (
-            <img src={topThree[2].players.avatar_url} className="mx-auto w-24 h-24 rounded-full border border-yellow-300 mb-1" />
+          {topThree[2]?.avatar_url && (
+            <img src={topThree[2].avatar_url} className="mx-auto w-24 h-24 rounded-full border border-yellow-300 mb-1" />
           )}
-          <div className="text-lg font-bold">{topThree[2]?.players?.username}</div>
+          <div className="text-lg font-bold">{topThree[2]?.username}</div>
           <div className="text-xs text-yellow-100">{topThree[2]?.total_earned.toFixed(2)} $BNANA</div>
         </div>
 
@@ -114,10 +117,10 @@ export default function Leaderboard() {
               className="flex items-center justify-between border-b border-yellow-900 py-1 text-sm text-yellow-200"
             >
               <div className="flex items-center gap-2">
-                {player.players?.avatar_url && (
-                  <img src={player.players.avatar_url} className="w-6 h-6 rounded-full border border-yellow-300" />
+                {player.avatar_url && (
+                  <img src={player.avatar_url} className="w-6 h-6 rounded-full border border-yellow-300" />
                 )}
-                <span>#{idx + 4} {player.players?.username}</span>
+                <span>#{idx + 4} {player.username}</span>
               </div>
               <span>{player.total_earned.toFixed(2)} $BNANA</span>
             </div>
