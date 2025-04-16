@@ -1,0 +1,91 @@
+/* Tailwind base imports */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles */
+body {
+  @apply bg-jungleGreen text-offWhite font-sans;
+}
+
+/* Import custom fonts */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700&display=swap');
+
+h1, h2, h3 {
+  font-family: 'Bebas Neue', sans-serif;
+}
+
+/* Fog Container for seamless animation */
+.fog-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;  /* Two copies side-by-side */
+    height: 100%;
+    display: flex;
+    pointer-events: none; /* Allow clicks to pass through */
+    animation: moveFog 12s linear infinite;
+  }
+  
+  .fog-container img {
+    width: 50%;  /* Each image takes half the container */
+    height: 100%;
+    object-fit: cover; /* Ensure the image covers the area */
+    opacity: 0.8; /* Adjust opacity as needed */
+  }
+  
+  /* Keyframes to move the fog container */
+  @keyframes moveFog {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+}
+  /* Firefly Animation */
+  @keyframes floatFirefly {
+    0% {
+      transform: translate(0, 0);
+      opacity: 0;
+    }
+    25% {
+      opacity: 1;
+    }
+    50% {
+      transform: translate(20px, -20px);
+      opacity: 1;
+    }
+    75% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate(0, 0);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes glowPulse {
+    0%, 100% {
+      box-shadow: 0 0 0px rgba(255, 255, 0, 0);
+    }
+    50% {
+      box-shadow: 0 0 25px rgba(255, 255, 0, 0.6);
+    }
+  }
+  
+  .animate-glow {
+    animation: glowPulse 1.2s ease-in-out infinite;
+  }
+  
+  .firefly {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: url('/assets/firefly.png') no-repeat center center;
+    background-size: cover;
+    animation-name: floatFirefly;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    pointer-events: none;
+  }
