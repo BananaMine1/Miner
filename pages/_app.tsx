@@ -1,6 +1,7 @@
 // pages/_app.tsx
 import '@rainbow-me/rainbowkit/styles.css';
 import '../styles/globals.css';
+import dynamic from 'next/dynamic';
 
 import type { AppProps } from 'next/app';
 import React from 'react';
@@ -16,7 +17,7 @@ import { mainnet, polygon, optimism, arbitrum } from 'wagmi/chains';
 
 import { WalletProvider } from '../lib/WalletContext';
 
-// 1. RainbowKit / wagmi config (wagmi 1.x + RainbowKit 2.x)
+// 1. RainbowKit / wagmi config (wagmi 1.x + RainbowKit 2.x)
 const wagmiConfig = getDefaultConfig({
   appName: 'Banana Miners',
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_ID || 'banana-miners',
@@ -27,7 +28,7 @@ const wagmiConfig = getDefaultConfig({
 // 2. React‑Query client
 const queryClient = new QueryClient();
 
-export default function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <WagmiProvider config={wagmiConfig}>
@@ -41,3 +42,5 @@ export default function App({ Component, pageProps }: AppProps) {
     </QueryClientProvider>
   );
 }
+
+export default dynamic(() => Promise.resolve(App), { ssr: false });
