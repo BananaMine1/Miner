@@ -1,6 +1,9 @@
 import React from 'react';
+import dynamic from 'next/dynamic';
 
-export default function Claim() {
+export default dynamic(() => Promise.resolve(ClaimPage), { ssr: false });
+
+function ClaimPage() {
   return (
     <div className="p-8">
       <h2 className="text-3xl font-bold mb-6 text-center">Claim Your $BNANA</h2>

@@ -4,11 +4,12 @@ import Head from 'next/head';
 import { useAccount } from 'wagmi';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
 
-export default function Home() {
+function Home() {
   const { isConnected } = useAccount();
-const { openConnectModal } = useConnectModal();
-const router = useRouter();
+  const { openConnectModal } = useConnectModal();
+  const router = useRouter();
   
 
   const [bgImage, setBgImage] = useState('/assets/jungle-background.png');
@@ -131,3 +132,5 @@ const router = useRouter();
     </>
   );
 }
+
+export default dynamic(() => Promise.resolve(Home), { ssr: false });

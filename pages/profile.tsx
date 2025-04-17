@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Head from 'next/head';
 import React from 'react';
+import dynamic from 'next/dynamic';
 
-export default function ProfilePage() {
+function Profile() {
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
@@ -107,3 +108,5 @@ export default function ProfilePage() {
     </>
   );
 }
+
+export default dynamic(() => Promise.resolve(Profile), { ssr: false });

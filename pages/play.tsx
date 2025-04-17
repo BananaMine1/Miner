@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
 
 import { useAccount } from 'wagmi';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
@@ -29,7 +30,7 @@ import { syncLeaderboard } from '../lib/syncLeaderboard';
 import { useGameState } from '../hooks/useGameState';
 import { useGameController } from '../hooks/useGameController';
 
-export default function Play() {
+function Play() {
   /* ---------------- wallet ---------------- */
   const { isConnected, address } = useAccount();
   const { openConnectModal } = useConnectModal();
@@ -386,3 +387,5 @@ export default function Play() {
     </>
   );
 }
+
+export default dynamic(() => Promise.resolve(Play), { ssr: false });

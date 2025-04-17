@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Head from 'next/head';
+import dynamic from 'next/dynamic';
 
 interface Player {
   id: string;
@@ -16,7 +17,7 @@ interface Player {
   avatar_url?: string;
 }
 
-export default function Leaderboard() {
+function Leaderboard() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -130,3 +131,5 @@ export default function Leaderboard() {
     </>
   );
 }
+
+export default dynamic(() => Promise.resolve(Leaderboard), { ssr: false });
