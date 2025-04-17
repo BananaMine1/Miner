@@ -1,8 +1,6 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 
-export default dynamic(() => Promise.resolve(ClaimPage), { ssr: false });
-
 function ClaimPage() {
   return (
     <div className="p-8">
@@ -16,3 +14,5 @@ function ClaimPage() {
     </div>
   );
 }
+
+export default dynamic(() => Promise.resolve(ClaimPage), { ssr: false });

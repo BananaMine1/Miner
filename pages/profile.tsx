@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Head from 'next/head';
-import React from 'react';
 import dynamic from 'next/dynamic';
 
 function Profile() {
