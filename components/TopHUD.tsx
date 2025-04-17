@@ -15,7 +15,8 @@ interface TopHUDProps {
   onOpenRoomModal: () => void;
   onClaimRewards: () => void;
   onClaimStreak: () => void;
-  onOpenAccount: () => void;        // <-- NEW
+  onOpenAccount: () => void;
+  onOpenLeaderboard: () => void;
 }
 
 function ProfileModal({
@@ -156,7 +157,8 @@ export default function TopHUD({
   onOpenRoomModal,
   onClaimRewards,
   onClaimStreak,
-  onOpenAccount,                    
+  onOpenAccount,
+  onOpenLeaderboard,
 }: TopHUDProps) {
   const { address, connect } = useWallet();        
   const [isHydrated, setIsHydrated] = useState(false);
@@ -301,6 +303,14 @@ export default function TopHUD({
               <span className="text-gray-400">--</span>
             )}
           </span>
+
+          {/* Leaderboard Button */}
+          <button
+            onClick={onOpenLeaderboard}
+            className="bg-yellow-400 text-green-900 px-3 py-1 rounded hover:scale-105 transition"
+          >
+            🏆 Leaderboard
+          </button>
 
           <button
             onClick={onOpenRoomModal}

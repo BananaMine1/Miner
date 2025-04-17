@@ -304,6 +304,7 @@ function Play() {
             });
           }}
           onOpenAccount={() => setShowWallet(true)}
+          onOpenLeaderboard={() => router.push('/leaderboard')}
         />
 
         {/* Game canvas flexes below the HUD */}

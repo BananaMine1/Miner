@@ -96,7 +96,21 @@ export function useGameState(wallet: string | undefined): GameState {
 
       // Simulate BNANA balance and pending rewards
       const balance = lbData ? Math.floor(lbData.total_earned) : 0;
-      const pending = lbData ? Math.floor(lbData.hashrate * 0.05) : 0;
+      // Time-based pending rewards calculation
+      let pending = 0;
+      if (lbData && playerData) {
+        const hashrate = lbData.hashrate || 0;
+        const lastClaimed = playerData.last_claimed ? new Date(playerData.last_claimed) : null;
+        const now = new Date();
+        if (lastClaimed) {
+          const secondsElapsed = Math.floor((now.getTime() - lastClaimed.getTime()) / 1000);
+          // Example: 0.01 BNANA per hashrate per minute
+          pending = hashrate * 0.01 * (secondsElapsed / 60);
+        } else {
+          // If never claimed, start accumulating from account creation
+          pending = 0;
+        }
+      }
       setBnanaBalance(balance);
       setPendingRewards(pending);
     } catch (err: any) {
