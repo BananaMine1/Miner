@@ -153,6 +153,13 @@ function Play() {
       persistGameState(activeMiners, currentRoomLevel, newBnana);
       return newBnana;
     });
+    // Update last_claimed in Supabase
+    if (isConnected && address) {
+      await supabase
+        .from('players')
+        .update({ last_claimed: new Date().toISOString() })
+        .eq('wallet', address);
+    }
     claim(); // Reset unclaimed earnings
     refreshGameState();
   };
