@@ -1,0 +1,33 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project-Wide Rules
+
+This document outlines the project-wide rules to ensure consistent navigation and understanding of the codebase.
+
+## General Guidelines
+- **Code Structure**: Follow a consistent file and folder structure to enhance readability and maintainability.
+- **Naming Conventions**: Use clear and descriptive names for files, components, and variables.
+- **Documentation**: Ensure all components and functions are well-documented with comments and Markdown files where necessary.
+
+## Specific Components
+- **GameRoomCanvas**: Refer to the `GameRoomCanvas` component guide for details on its initialization, rendering, and interaction.
+- **FogLayer**: Ensure the `FogLayer` component properly loads textures and handles rendering efficiently.
+
+## Best Practices
+- **Error Handling**: Implement robust error handling across all components to prevent runtime issues.
+- **Performance Optimization**: Regularly review and optimize code for performance, especially in rendering loops.
+
+## Additional Best Practices for PixiJS and React Integration
+- **Responsive Design**: Ensure that the PixiJS canvas and elements are responsive to window size changes. Use event listeners to adjust dimensions dynamically.
+- **Asset Management**: Use `PIXI.Assets.load()` for loading textures and handle fallbacks gracefully.
+- **Performance Optimization**: Use `useTick` from `@pixi/react` to efficiently update animations and movements, minimizing unnecessary re-renders.
+- **Component Modularity**: Break down complex scenes into smaller, reusable components to improve maintainability and readability.
+- **Error Handling**: Implement robust error handling when loading assets or initializing the PixiJS application to prevent runtime issues.
+- **State Management**: Use React's state management to control and update the properties of PixiJS elements, ensuring that changes in state are reflected in the rendering.
+- **Avoiding Server-Side Rendering (SSR)**: Disable SSR for components using PixiJS, as it is client-only.
+- **DO NOT DOWNGRADE DEPENDENCIES**: Do not downgrade any dependencies.
+
+For more details, refer to individual component guides and documentation within the codebase.

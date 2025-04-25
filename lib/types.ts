@@ -1,4 +1,5 @@
 export interface Miner {
+  instanceId: string;
   id: number;
   name: string;
   hash: number;

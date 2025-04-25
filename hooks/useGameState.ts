@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { roomLevels } from '../lib/gamedata';
 
 interface PlayerData {
   wallet: string;
@@ -8,6 +9,7 @@ interface PlayerData {
   avatar_url: string | null;
   daily_streak: number;
   last_claimed: string | null;
+  room_level: number;
 }
 
 interface LeaderboardData {
@@ -22,9 +24,11 @@ interface GameState {
   leaderboard: LeaderboardData | null;
   bnanaBalance: number;
   pendingRewards: number;
+  roomLevel: number;
   loading: boolean;
   error: string | null;
   refresh: () => void;
+  upgradeRoom: () => Promise<boolean>;
 }
 
 const DEFAULT_PLAYER = (wallet: string): PlayerData => ({
@@ -34,6 +38,7 @@ const DEFAULT_PLAYER = (wallet: string): PlayerData => ({
   avatar_url: null,
   daily_streak: 0,
   last_claimed: null,
+  room_level: 0,
 });
 
 const DEFAULT_LEADERBOARD = (wallet: string): LeaderboardData => ({
@@ -48,6 +53,7 @@ export function useGameState(wallet: string | undefined): GameState {
   const [leaderboard, setLeaderboard] = useState<LeaderboardData | null>(null);
   const [bnanaBalance, setBnanaBalance] = useState(0);
   const [pendingRewards, setPendingRewards] = useState(0);
+  const [roomLevel, setRoomLevel] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,10 +65,10 @@ export function useGameState(wallet: string | undefined): GameState {
       // Fetch player data
       let { data: playerData, error: playerErr } = await supabase
         .from('players')
-        .select('*')
+        .select('wallet, username, bio, avatar_url, daily_streak, last_claimed, room_level')
         .eq('wallet', wallet)
         .maybeSingle();
-      if (playerErr) throw playerErr;
+      if (playerErr) throw new Error(`Failed to fetch player data: ${playerErr.message}`);
       if (!playerData) {
         // New user: create default player row
         const { data: newPlayer, error: insertErr } = await supabase
@@ -70,18 +76,19 @@ export function useGameState(wallet: string | undefined): GameState {
           .insert([DEFAULT_PLAYER(wallet)])
           .select()
           .maybeSingle();
-        if (insertErr) throw insertErr;
+        if (insertErr) throw new Error(`Failed to insert new player data: ${insertErr.message}`);
         playerData = newPlayer;
       }
       setPlayer(playerData);
+      setRoomLevel(playerData.room_level || 0);
 
       // Fetch leaderboard data
       let { data: lbData, error: lbErr } = await supabase
         .from('leaderboard')
-        .select('*')
+        .select('wallet, total_earned, hashrate, updated_at')
         .eq('wallet', wallet)
         .maybeSingle();
-      if (lbErr) throw lbErr;
+      if (lbErr) throw new Error(`Failed to fetch leaderboard data: ${lbErr.message}`);
       if (!lbData) {
         // New user: create default leaderboard row
         const { data: newLb, error: insertLbErr } = await supabase
@@ -89,7 +96,7 @@ export function useGameState(wallet: string | undefined): GameState {
           .insert([DEFAULT_LEADERBOARD(wallet)])
           .select()
           .maybeSingle();
-        if (insertLbErr) throw insertLbErr;
+        if (insertLbErr) throw new Error(`Failed to insert new leaderboard data: ${insertLbErr.message}`);
         lbData = newLb;
       }
       setLeaderboard(lbData);
@@ -119,10 +126,51 @@ export function useGameState(wallet: string | undefined): GameState {
       setLeaderboard(null);
       setBnanaBalance(0);
       setPendingRewards(0);
+      setRoomLevel(0);
     } finally {
       setLoading(false);
     }
   }, [wallet]);
+
+  // Upgrade room function
+  const upgradeRoom = async (): Promise<boolean> => {
+    if (!player || !wallet) return false;
+    
+    const currentLevel = roomLevel;
+    const nextLevel = currentLevel + 1;
+    
+    // Check if next level exists
+    if (!roomLevels[nextLevel]) return false;
+    
+    // Check if player has enough BNANA
+    const upgradeCost = roomLevels[nextLevel].upgradeCost;
+    if (bnanaBalance < upgradeCost) return false;
+    
+    try {
+      // Update player's room level
+      const { error: updateErr } = await supabase
+        .from('players')
+        .update({ 
+          room_level: nextLevel,
+        })
+        .eq('wallet', wallet);
+      
+      if (updateErr) throw new Error(`Failed to upgrade room: ${updateErr.message}`);
+      
+      // Deduct BNANA (in a real app, this would likely be handled by a smart contract)
+      const newBalance = bnanaBalance - upgradeCost;
+      setBnanaBalance(newBalance);
+      
+      // Update local state
+      setRoomLevel(nextLevel);
+      setPlayer({ ...player, room_level: nextLevel });
+      
+      return true;
+    } catch (err: any) {
+      setError(err.message || 'Failed to upgrade room');
+      return false;
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -133,8 +181,10 @@ export function useGameState(wallet: string | undefined): GameState {
     leaderboard,
     bnanaBalance,
     pendingRewards,
+    roomLevel,
     loading,
     error,
     refresh: fetchData,
+    upgradeRoom,
   };
 } 

@@ -4,13 +4,14 @@ import { createPortal } from 'react-dom';
 import { useAccount, useDisconnect } from 'wagmi';
 import { X, LogOut } from 'lucide-react';
 
-interface Props {
+interface WalletModalProps {
   open: boolean;
   onClose: () => void;
-  bnana: number;
+  wallet: string;
+  onDisconnect: () => void;
 }
 
-export default function WalletModal({ open, onClose, bnana }: Props) {
+const WalletModal: React.FC<WalletModalProps> = ({ open, onClose, wallet, onDisconnect }) => {
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
 
@@ -23,45 +24,45 @@ export default function WalletModal({ open, onClose, bnana }: Props) {
 
   if (!open) return null;
 
+  const handleDisconnect = () => {
+    onDisconnect();
+    onClose();
+  };
+
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-        aria-hidden
-      />
-      {/* panel */}
-      <div className="relative bg-green-950 text-white rounded-xl shadow-xl p-6 w-80">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+      <div className="bg-white text-jungleGreen rounded-lg shadow-lg p-6 w-full max-w-sm relative">
         <button
+          className="absolute top-2 right-2 text-xl text-gray-400 hover:text-gray-700"
           onClick={onClose}
-          className="absolute top-3 right-3 text-yellow-300 hover:text-yellow-400"
         >
-          <X size={20} />
+          ×
         </button>
-
-        <h2 className="text-xl font-bold mb-4 text-center">Wallet</h2>
-
-        <div className="space-y-3">
-          <div>
-            <span className="text-yellow-300 text-sm">Address</span>
-            <div className="break-all font-mono text-xs">{address}</div>
-          </div>
-
-          <div>
-            <span className="text-yellow-300 text-sm">In‑game Balance</span>
-            <div className="text-lg font-bold">{bnana.toFixed(2)} $BNANA</div>
+        <h2 className="text-2xl font-bold mb-4 text-center">Wallet Options</h2>
+        <div className="mb-4">
+          <div className="text-center font-medium mb-2">Connected Wallet</div>
+          <div className="bg-gray-100 p-3 rounded text-center break-all">
+            {wallet}
           </div>
         </div>
-
-        <button
-          onClick={() => { disconnect(); onClose(); }}
-          className="mt-6 w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 py-2 rounded"
-        >
-          <LogOut size={16} /> Disconnect
-        </button>
+        <div className="flex justify-center gap-3">
+          <button
+            className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 transition"
+            onClick={handleDisconnect}
+          >
+            Disconnect
+          </button>
+          <button
+            className="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded hover:bg-gray-400 transition"
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>,
     document.body
   );
-}
+};
+
+export default WalletModal;

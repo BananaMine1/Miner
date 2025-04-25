@@ -1,0 +1,15 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# GameRoomCanvas Component Guide
+
+The `GameRoomCanvas` component is responsible for rendering the game room using PixiJS. It initializes a PixiJS `Application` and manages the rendering of miners and the game grid.
+
+Key Elements:
+- **Initialization**: The component initializes a PixiJS `Application` and appends the canvas to the DOM.
+- **Rendering**: It uses containers to manage the grid and sprites for miners.
+- **Interaction**: Handles user interactions with the grid and updates the state accordingly.
+
+For more details, see the [GameRoomCanvas.tsx](mdc:components/GameRoomCanvas.tsx) file.

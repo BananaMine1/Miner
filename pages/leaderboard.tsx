@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
+import { sanitizeInput } from '../lib/sanitize';
 
 interface Player {
   id: string;
@@ -88,7 +89,7 @@ function Leaderboard() {
           {topThree[1]?.avatar_url && (
             <img src={topThree[1].avatar_url} className="mx-auto w-24 h-24 rounded-full border border-yellow-300 mb-1" />
           )}
-          <div className="text-lg font-bold">{topThree[1]?.username}</div>
+          <div className="text-lg font-bold">{sanitizeInput(topThree[1]?.username)}</div>
           <div className="text-xs text-yellow-100">{topThree[1]?.total_earned.toFixed(2)} $BNANA</div>
         </div>
 
@@ -97,7 +98,7 @@ function Leaderboard() {
           {topThree[0]?.avatar_url && (
             <img src={topThree[0].avatar_url} className="mx-auto w-24 h-24 rounded-full border border-yellow-300 mb-1" />
           )}
-          <div className="text-lg font-bold">{topThree[0]?.username}</div>
+          <div className="text-lg font-bold">{sanitizeInput(topThree[0]?.username)}</div>
           <div className="text-xs text-yellow-100">{topThree[0]?.total_earned.toFixed(2)} $BNANA</div>
         </div>
 
@@ -106,7 +107,7 @@ function Leaderboard() {
           {topThree[2]?.avatar_url && (
             <img src={topThree[2].avatar_url} className="mx-auto w-24 h-24 rounded-full border border-yellow-300 mb-1" />
           )}
-          <div className="text-lg font-bold">{topThree[2]?.username}</div>
+          <div className="text-lg font-bold">{sanitizeInput(topThree[2]?.username)}</div>
           <div className="text-xs text-yellow-100">{topThree[2]?.total_earned.toFixed(2)} $BNANA</div>
         </div>
 
@@ -121,7 +122,7 @@ function Leaderboard() {
                 {player.avatar_url && (
                   <img src={player.avatar_url} className="w-6 h-6 rounded-full border border-yellow-300" />
                 )}
-                <span>#{idx + 4} {player.username}</span>
+                <span>#{idx + 4} {sanitizeInput(player.username)}</span>
               </div>
               <span>{player.total_earned.toFixed(2)} $BNANA</span>
             </div>

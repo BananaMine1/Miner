@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
+import { sanitizeInput } from '../lib/sanitize';
+
+const CSRF_TOKEN = process.env.NEXT_PUBLIC_CSRF_TOKEN || 'banana-csrf-demo-token';
 
 function Profile() {
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [wallet] = useState('demo-wallet-id'); // Replace with actual wallet later
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +27,7 @@ function Profile() {
       .upload(filePath, file, { upsert: true });
   
     if (uploadError) {
-      console.error('Upload failed:', uploadError.message);
+      setError('Upload failed: ' + uploadError.message);
       return;
     }
   
@@ -35,26 +39,38 @@ function Profile() {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const { error } = await supabase.from('players').upsert(
-      [
-        {
-          wallet,
+    setError(null);
+    try {
+      // Get the current session JWT from Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      const jwt = session?.access_token;
+      if (!jwt) {
+        setError('Not authenticated. Please log in.');
+        setLoading(false);
+        return;
+      }
+      const res = await fetch('/api/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${jwt}`,
+          'x-csrf-token': CSRF_TOKEN,
+        },
+        body: JSON.stringify({
           username,
           bio,
           avatar_url: avatarUrl,
-        },
-      ],
-      {
-        onConflict: 'wallet',
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        setError(result.error || 'Failed to save profile.');
+      } else {
+        alert('Profile saved!');
       }
-    );
-  
-    if (error) {
-      console.error('Failed to save profile:', error.message);
-    } else {
-      alert('Profile saved!');
+    } catch (err: any) {
+      setError(err.message || 'Failed to save profile.');
     }
-  
     setLoading(false);
   };
 
@@ -94,6 +110,13 @@ function Profile() {
           {avatarUrl && (
             <img src={avatarUrl} alt="Avatar preview" className="w-32 h-32 rounded-full" />
           )}
+
+          <div className="mt-2 text-yellow-200 text-xs">
+            <div><b>Preview Username:</b> {sanitizeInput(username)}</div>
+            <div><b>Preview Bio:</b> {sanitizeInput(bio)}</div>
+          </div>
+
+          {error && <div className="text-red-500 text-sm">{error}</div>}
 
           <button
             onClick={handleSubmit}

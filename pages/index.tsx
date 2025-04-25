@@ -1,44 +1,38 @@
 // pages/index.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import PixiLandingBackground from '../components/PixiLandingBackground';
 import Head from 'next/head';
 import { useAccount } from 'wagmi';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useRouter } from 'next/router';
-import dynamic from 'next/dynamic';
 
-function Home() {
-  const { isConnected } = useAccount();
+export default function HomePage() {
+  const [isClient, setIsClient] = useState(false);
+  const [isNight, setIsNight] = useState(false);
+  const { address, isConnected } = useAccount();
   const { openConnectModal } = useConnectModal();
   const router = useRouter();
-  
-
-  const [bgImage, setBgImage] = useState('/assets/jungle-background.png');
-  const [isNight, setIsNight] = useState(false);
-  const [manualOverride, setManualOverride] = useState<boolean | null>(null);
-  const [heroImage, setHeroImage] = useState('/assets/hero-graphic.png');
-
-  const setBackground = (night: boolean) => {
-    setIsNight(night);
-    setBgImage(night
-      ? '/assets/jungle-background-night.png'
-      : '/assets/jungle-background.png'
-    );
-    setHeroImage(night
-      ? '/assets/hero-graphic-night.png'
-      : '/assets/hero-graphic.png'
-    );
-  };
 
   useEffect(() => {
-    if (manualOverride === null) {
-      const hour = new Date().getHours();
-      setBackground(hour >= 18 || hour < 6);
-    }
-  }, [manualOverride]);
+    setIsClient(true);
 
+    // Set initial day/night based on time (e.g., 6 PM to 6 AM is night)
+    const currentHour = new Date().getHours();
+    setIsNight(currentHour >= 18 || currentHour < 6);
+
+    // Optional: Update day/night periodically (e.g., every minute)
+    const intervalId = setInterval(() => {
+      const updatedHour = new Date().getHours();
+      setIsNight(updatedHour >= 18 || updatedHour < 6);
+    }, 60000); // Check every minute
+
+    return () => clearInterval(intervalId); // Cleanup interval on unmount
+  }, []);
+
+  // --- Audio setup ---
   useEffect(() => {
     const startAudio = () => {
-      const audioEl = document.getElementById('bg-music') as HTMLAudioElement;
+      const audioEl = document.getElementById('bg-music') as HTMLAudioElement | null;
       if (audioEl) {
         audioEl.volume = 0.5;
         audioEl.play().catch(() => {});
@@ -49,17 +43,11 @@ function Home() {
     return () => document.removeEventListener('click', startAudio);
   }, []);
 
-  const toggleMode = () => {
-    const next = !isNight;
-    setManualOverride(next);
-    setBackground(next);
-  };
-
   const handleStart = () => {
-    if (!isConnected) {
-      openConnectModal?.();
-    } else {
-      router.push('/play');
+    if (isConnected && address) {
+      router.push(`/play/${address}`);
+    } else if (openConnectModal) {
+      openConnectModal();
     }
   };
 
@@ -67,70 +55,56 @@ function Home() {
     <>
       <Head>
         <title>Banana Miners</title>
-        <meta
-          name="description"
-          content="Mine $BNANA with Jungle Rigs and build your mining empire in a lush jungle setting."
-        />
+        <meta name="description" content="Mine $BNANA in a lush jungle setting." />
       </Head>
 
-      {/* Background Music */}
-      <audio id="bg-music" loop src="/assets/ambient-music.mp3" preload="auto" />
+      {/* Background music element */}
+      <audio
+        id="bg-music"
+        loop
+        src="/assets/ambient-music.mp3"
+        preload="auto"
+      />
 
-      {/* Day/Night Toggle */}
-      <button
-        onClick={toggleMode}
-        className="fixed top-4 right-4 z-50 bg-yellow-300 text-green-900 font-bold px-4 py-2 rounded shadow hover:scale-105 transition"
-      >
-        Toggle {isNight ? 'Day' : 'Night'}
-      </button>
+      <div className="relative w-screen h-screen overflow-hidden bg-black">
+        {/* Pass isNight prop to PixiLandingBackground */}
+        {isClient ? <PixiLandingBackground isNight={isNight} /> :
+          <div className="absolute inset-0 flex items-center justify-center text-gray-500">Rendering background...</div>
+        }
 
-      <div className="min-h-screen relative overflow-hidden">
-        {/* Background */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('${bgImage}')` }}
-        />
-
-        {/* Fog */}
-        {isNight && (
-          <div className="fog-container">
-            <img src="/assets/fog.png" alt="fog" />
-            <img src="/assets/fog.png" alt="fog" />
+        {/* Main Content Area - Add transform to shift content block higher */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-10 transform -translate-y-16">
+          {/* Hero Image */}
+          <div className="relative w-full max-w-[300px] md:max-w-[400px] xl:max-w-[500px] mx-auto pointer-events-none">
+            <img
+              src={isNight ? '/assets/hero-graphic-night.png' : '/assets/hero-graphic.png'}
+              alt="Banana Miners Hero"
+              className="w-full"
+            />
           </div>
-        )}
 
-        {/* Fireflies */}
-        {isNight && (
-          <div className="absolute inset-0 pointer-events-none">
-            {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className="firefly"
-                style={{
-                  top: `${Math.random() * 90 + 5}%`,
-                  left: `${Math.random() * 90 + 5}%`,
-                  animationDelay: `${Math.random() * 5}s`,
-                  animationDuration: `${4 + Math.random() * 4}s`,
-                }}
-              />
-            ))}
-          </div>
-        )}
+          {/* Start Button */}
+          <button 
+            onClick={handleStart}
+            className="relative z-20 mt-[-20%] md:mt-[-15%] pointer-events-auto focus:outline-none hover:scale-110 transition duration-300 ease-in-out"
+            aria-label="Start Mining"
+          >
+             <img
+              src={isNight ? '/assets/start-button-night.png' : '/assets/start-button.png'}
+              alt="Start Mining Button Graphic"
+              className="w-[200px] md:w-[250px] xl:w-[300px]"
+            />
+          </button>
 
-        {/* Hero + Start Button */}
-        <div className="relative w-full max-w-[300px] md:max-w-[400px] xl:max-w-[500px] mx-auto">
-          <img src={heroImage} alt="Banana Miners Hero" className="w-full" />
-
-          <img
-         src={isNight ? '/assets/start-button-night.png' : '/assets/start-button.png'}
-         alt="Start Mining"
-         onClick={handleStart}
-         className="absolute bottom-[23%] left-1/2 transform -translate-x-1/2 w-[300px] cursor-pointer hover:scale-110 transition"
-/>
+          {/* Add back temporary toggle button */}
+          <button 
+            onClick={() => setIsNight(!isNight)}
+            className="absolute bottom-4 right-4 bg-yellow-400 text-black p-2 rounded z-30 pointer-events-auto"
+          >
+            Toggle Day/Night (Temp)
+          </button>
         </div>
       </div>
     </>
   );
 }
-
-export default dynamic(() => Promise.resolve(Home), { ssr: false });

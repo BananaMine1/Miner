@@ -2,7 +2,7 @@ import React from 'react';
 import { miners } from '../lib/gamedata';
 
 interface BuyMinerModalProps {
-  onBuy: (id: number) => void;
+  onBuy: (miner: Miner) => void;
   onClose: () => void;
 }
 
@@ -19,7 +19,7 @@ export default function BuyMinerModal({ onBuy, onClose }: BuyMinerModalProps) {
               <p>🖥️ {m.hash} GH/s</p>
               <button
                 className="mt-2 w-full bg-yellow-400 text-green-900 font-bold py-1 rounded"
-                onClick={() => onBuy(m.id)}
+                onClick={() => onBuy(m)}
               >
                 Buy
               </button>

@@ -10,7 +10,13 @@ module.exports = {
           jungleGreen: "#1B5E20", // deep jungle green
           bananaYellow: "#FFD600",
           offWhite: "#F1F1F1"
-        }
+        },
+        minWidth: {
+          '48': '48px',
+        },
+        minHeight: {
+          '48': '48px',
+        },
       },
     },
     plugins: [],
