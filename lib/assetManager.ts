@@ -43,8 +43,8 @@ export async function loadTexture(path: string): Promise<Texture> {
  * Preloads an array of textures.
  * @param paths Array of asset paths
  */
-export function preloadTextures(paths: string[]): Promise<void[]> {
-  return Promise.all(paths.map(loadTexture)).then(() => {});
+export function preloadTextures(paths: string[]): Promise<Texture[]> {
+  return Promise.all(paths.map(loadTexture));
 }
 
 /**

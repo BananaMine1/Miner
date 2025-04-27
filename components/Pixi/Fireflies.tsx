@@ -1,8 +1,9 @@
+/// <reference path="../../types/pixi-react-jsx.d.ts" />
 // components/Pixi/Fireflies.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { useTick, extend } from '@pixi/react';
 import { Texture, Ticker, Assets, Container as PixiContainer, Sprite as PixiSprite } from 'pixi.js';
-extend({ Container: PixiContainer, Sprite: PixiSprite });
+import * as PIXI from 'pixi.js';
 
 interface Props {
   count: number;
@@ -75,22 +76,23 @@ export default function Fireflies({ count, dimensions }: Props) {
   if (!tex) return null;
 
   return (
-    <container>
+    <pixiContainer>
       {data.current.map((f, i) => (
-        <sprite
-          key={i}
+        <pixiSprite
           ref={(el: any) => {
-            if (el) sprites.current[i] = el;
+            if (el) {
+              el.anchor?.set?.(0.5, 0.5);
+              el.blendMode = 1 as any;
+              sprites.current[i] = el;
+            }
           }}
           texture={tex}
           x={f.x}
           y={f.y}
           width={SIZE}
           height={SIZE}
-          anchor={{ x: 0.5, y: 0.5 }}
-          blendMode={1}
         />
       ))}
-    </container>
+    </pixiContainer>
   );
 }

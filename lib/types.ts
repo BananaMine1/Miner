@@ -9,4 +9,10 @@ export interface Miner {
   xp?: number;
   overheated?: boolean;
   durability?: number;
+  level?: number;
+  maxLevel?: number;
+  xpToNext?: number;
+  baseUpgradeCost?: number;
+  baseRepairRate?: number;
+  specialAbility?: string;
 }

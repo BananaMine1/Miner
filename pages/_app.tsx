@@ -6,6 +6,8 @@ import type { AppProps } from 'next/app';
 import React, { useEffect } from 'react';
 import { preloadTextures } from '../lib/assetManager';
 import { Toaster } from 'sonner';
+import { extend } from '@pixi/react';
+import { Container, Sprite } from 'pixi.js';
 
 // Remove Pixi setup from _app.tsx
 // It should be handled within specific components if needed,
@@ -52,6 +54,9 @@ function App({ Component, pageProps }: AppProps) {
   []);
   // 2. React‑Query client (client‐only)
   const queryClient = React.useMemo(() => new QueryClient(), []);
+
+  // Extend PixiJS components
+  extend({ Container, Sprite });
 
   return (
     <QueryClientProvider client={queryClient}>

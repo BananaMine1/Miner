@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, Rea
 import { supabase } from './supabaseClient';
 import { useWallet } from './WalletContext';
 import { roomLevels } from './gamedata';
+import { getUpgradeCost, getXpToNext, getRepairCost, getUpgradedHash, getUpgradedWatts } from './minerUtils';
 
 // --- Types ---
 export interface PlayerProfile {
@@ -22,6 +23,7 @@ export interface Miner {
   overheated: boolean;
   boosted: boolean;
   watts: number;
+  price?: number;
 }
 
 export interface GameState {
@@ -43,6 +45,8 @@ export interface GameStateActions {
   removeMiner: (instanceId: string) => Promise<void>;
   updateProfile: (profile: Partial<PlayerProfile>) => Promise<void>;
   refresh: () => Promise<void>;
+  upgradeMiner: (instanceId: string) => Promise<void>;
+  repairMiner: (instanceId: string) => Promise<void>;
 }
 
 interface GameStateContextType extends GameState, GameStateActions {}
@@ -160,18 +164,24 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     setError(null);
     try {
+      const price = miner.price || 0;
+      if (bnana < price) throw new Error('Not enough BNANA');
+      // --- On-chain integration placeholder ---
+      // await contract.buyMiner(miner.id, { from: address });
+      // After on-chain tx, fetch new balance and update state
       const updatedMiners = [...miners, miner];
       setMiners(updatedMiners);
+      setBnana(b => b - price);
       await supabase
         .from('players')
-        .update({ miners: updatedMiners })
+        .update({ miners: updatedMiners, bnana: bnana - price })
         .eq('wallet', address);
     } catch (err: any) {
       setError(err.message || 'Failed to buy miner');
     } finally {
       setLoading(false);
     }
-  }, [address, miners]);
+  }, [address, miners, bnana]);
 
   const removeMiner = useCallback(async (instanceId: string) => {
     if (!address) return;
@@ -217,6 +227,73 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     await loadState();
   }, [loadState]);
 
+  const upgradeMiner = useCallback(async (instanceId: string) => {
+    if (!address) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const idx = miners.findIndex(m => m.instanceId === instanceId);
+      if (idx === -1) throw new Error('Miner not found');
+      const miner = miners[idx];
+      const upgradeCost = getUpgradeCost(miner);
+      const xpToNext = getXpToNext(miner);
+      if (miner.level >= (miner.maxLevel ?? 99)) throw new Error('Already at max level');
+      if ((miner.xp ?? 0) < xpToNext) throw new Error('Not enough XP');
+      if (bnana < upgradeCost) throw new Error('Not enough BNANA');
+      // Apply upgrade
+      const upgradedMiner = {
+        ...miner,
+        level: (miner.level ?? 1) + 1,
+        xp: (miner.xp ?? 0) - xpToNext,
+        hash: getUpgradedHash({ ...miner, level: (miner.level ?? 1) + 1 }),
+        watts: getUpgradedWatts({ ...miner, level: (miner.level ?? 1) + 1 }),
+      };
+      const updatedMiners = [...miners];
+      updatedMiners[idx] = upgradedMiner;
+      setMiners(updatedMiners);
+      setBnana(b => b - upgradeCost);
+      await supabase
+        .from('players')
+        .update({ miners: updatedMiners, bnana: bnana - upgradeCost })
+        .eq('wallet', address);
+    } catch (err: any) {
+      setError(err.message || 'Failed to upgrade miner');
+    } finally {
+      setLoading(false);
+    }
+  }, [address, miners, bnana]);
+
+  const repairMiner = useCallback(async (instanceId: string) => {
+    if (!address) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const idx = miners.findIndex(m => m.instanceId === instanceId);
+      if (idx === -1) throw new Error('Miner not found');
+      const miner = miners[idx];
+      const repairCost = getRepairCost(miner);
+      if ((miner.durability ?? 100) >= 100) throw new Error('Already at full durability');
+      if (bnana < repairCost) throw new Error('Not enough BNANA');
+      // Apply repair
+      const repairedMiner = {
+        ...miner,
+        durability: 100,
+      };
+      const updatedMiners = [...miners];
+      updatedMiners[idx] = repairedMiner;
+      setMiners(updatedMiners);
+      setBnana(b => b - repairCost);
+      await supabase
+        .from('players')
+        .update({ miners: updatedMiners, bnana: bnana - repairCost })
+        .eq('wallet', address);
+    } catch (err: any) {
+      setError(err.message || 'Failed to repair miner');
+    } finally {
+      setLoading(false);
+    }
+  }, [address, miners, bnana]);
+
   const value: GameStateContextType = {
     profile,
     bnana,
@@ -233,6 +310,8 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     removeMiner,
     updateProfile,
     refresh,
+    upgradeMiner,
+    repairMiner,
   };
 
   return (

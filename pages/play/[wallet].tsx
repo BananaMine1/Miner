@@ -87,6 +87,12 @@ export default function PlayWalletPage({ wallet, gridConfig: initialGridConfig }
 
   // --- Core grid functions ---
   function placeMiner(position: number, minerType: any) {
+    const usedWatts = grid.reduce((sum, tile) => sum + (tile.miner ? tile.miner.watts : 0), 0);
+    const maxWatts = roomData?.maxPower || 160;
+    if (usedWatts + (minerType.watts || 10) > maxWatts) {
+      alert('Room wattage limit exceeded!');
+      return;
+    }
     const filtered = miners.filter(m => m.position !== position);
     const newMiner = {
       ...minerType,
@@ -228,12 +234,16 @@ export default function PlayWalletPage({ wallet, gridConfig: initialGridConfig }
         handleRemoveMiner(openMiner.position);
         setOpenMiner(null);
       }} />}
-      {showBuyModal && <BuyMinerModal onBuy={minerType => {
-        if (selectedTile == null) return;
-        const { position, ...rest } = minerType;
-        placeMiner(selectedTile, rest);
-        setShowBuyModal(false);
-      }} onClose={() => setShowBuyModal(false)} />}
+      {showBuyModal && <BuyMinerModal
+        onBuy={minerType => {
+          if (selectedTile == null) return;
+          placeMiner(selectedTile, minerType);
+          setShowBuyModal(false);
+        }}
+        onClose={() => setShowBuyModal(false)}
+        usedWatts={usedWatts}
+        maxWatts={maxWatts}
+      />}
       {/* AAA loading overlay */}
       {loading && (
         <div

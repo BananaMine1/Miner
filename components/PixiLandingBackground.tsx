@@ -1,10 +1,10 @@
+/// <reference path="../types/pixi-react-jsx.d.ts" />
 // components/PixiLandingBackground.tsx
 import React, { useEffect, useState } from 'react';
 import { Application, extend } from '@pixi/react';
-import { Texture, TilingSprite as PixiTilingSprite, Assets, Sprite as PixiSprite, Container as PixiContainer } from 'pixi.js';
+import { Texture, TilingSprite as PixiTilingSprite, Assets, Sprite as PixiSprite } from 'pixi.js';
 import FogLayer from './Pixi/FogLayer';
 import Fireflies from './Pixi/Fireflies';
-extend({ Container: PixiContainer, Sprite: PixiSprite });
 
 // Restore isNight prop
 interface Props {
@@ -102,17 +102,21 @@ export default function PixiLandingBackground({ isNight }: Props) {
       autoDensity={true}
       className="absolute inset-0 z-0 pointer-events-none"
     >
-      <container>
-        <sprite
+      <pixiContainer>
+        <pixiSprite
+          ref={el => {
+            if (el) {
+              el.anchor?.set?.(0, 0);
+            }
+          }}
           texture={bgTex}
           width={size.w}
           height={size.h}
-          anchor={0}
         />
         {/* Conditionally render effects within the same Application */}
         {isNight && <FogLayer dimensions={size} />}
         {isNight && <Fireflies count={20} dimensions={size} />}
-      </container>
+      </pixiContainer>
     </Application>
   );
 } 

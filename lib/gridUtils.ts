@@ -66,7 +66,7 @@ export function getGridSlotWorldPosition(col, row, gridConfig: GridConfig) {
       y: row * cellSize + cellSize / 2 + offsetY
     };
   }
-}
+} 
 
 /*
 ====================

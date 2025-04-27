@@ -1,8 +1,9 @@
+/// <reference path="../../types/pixi-react-jsx.d.ts" />
 // components/Pixi/FogLayer.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { useTick, extend } from '@pixi/react';
-import { Texture, Assets, Ticker, Container as PixiContainer, Sprite as PixiSprite } from 'pixi.js';
-extend({ Container: PixiContainer, Sprite: PixiSprite });
+import { Texture, Assets, Ticker, Sprite as PixiSprite } from 'pixi.js';
+import * as PIXI from 'pixi.js';
 
 interface Props {
   dimensions: { w: number; h: number };
@@ -113,23 +114,39 @@ export default function FogLayer({ dimensions }: Props) {
   console.log(`Rendering FogLayer: width=${w} height=${fogHeight} y=${fogY} (offset: ${verticalOffset})`); 
 
   return (
-    <container ref={containerRef} x={0} y={fogY}>
-      <sprite
-        ref={sprite1Ref}
+    <pixiContainer ref={el => {
+      if (el) {
+        el.x = 0;
+        el.y = fogY;
+        containerRef.current = el;
+      }
+    }}>
+      <pixiSprite
+        ref={el => {
+          if (el) {
+            el.blendMode = 1 as any;
+            el.alpha = 0.8;
+            sprite1Ref.current = el;
+          }
+        }}
         texture={tex}
         width={w}
         height={fogHeight}
         x={0}
-        alpha={0.8}
       />
-      <sprite
-        ref={sprite2Ref}
+      <pixiSprite
+        ref={el => {
+          if (el) {
+            el.blendMode = 1 as any;
+            el.alpha = 0.8;
+            sprite2Ref.current = el;
+          }
+        }}
         texture={tex}
         width={w}
         height={fogHeight}
         x={w}
-        alpha={0.8}
       />
-    </container>
+    </pixiContainer>
   );
 }

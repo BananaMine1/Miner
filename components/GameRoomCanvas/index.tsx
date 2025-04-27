@@ -129,7 +129,7 @@ const GameRoomCanvas: React.FC<GameRoomCanvasProps> = (props) => {
       }
       if (pixiApp) {
         try {
-          pixiApp.destroy(true, { children: true, texture: true });
+        pixiApp.destroy(true, { children: true, texture: true });
         } catch (e) {
           // Suppress PixiJS v8 _cancelResize error
         }
@@ -196,15 +196,15 @@ const GameRoomCanvas: React.FC<GameRoomCanvasProps> = (props) => {
   // Set gameLayer position and scale from props
   useEffect(() => {
     if (!gameLayer || !gameLayer.position) return;
-    if (props.gameLayerPosition) {
-      gameLayer.position.set(props.gameLayerPosition.x, props.gameLayerPosition.y);
-    } else {
-      gameLayer.position.set(0, 0);
-    }
-    if (props.gameLayerScale) {
-      gameLayer.scale.set(props.gameLayerScale.x, props.gameLayerScale.y);
-    } else {
-      gameLayer.scale.set(1, 1);
+      if (props.gameLayerPosition) {
+        gameLayer.position.set(props.gameLayerPosition.x, props.gameLayerPosition.y);
+      } else {
+        gameLayer.position.set(0, 0);
+      }
+      if (props.gameLayerScale) {
+        gameLayer.scale.set(props.gameLayerScale.x, props.gameLayerScale.y);
+      } else {
+        gameLayer.scale.set(1, 1);
     }
   }, [gameLayer, props.gameLayerPosition, props.gameLayerScale]);
 
@@ -239,8 +239,8 @@ const GameRoomCanvas: React.FC<GameRoomCanvasProps> = (props) => {
           />
         )}
         {gameLayer && (
-          <MinerLayer
-            gameLayer={gameLayer}
+      <MinerLayer
+        gameLayer={gameLayer}
             slots={slots}
             onMinerDragStart={handleMinerDragStart}
             onMinerClick={handleMinerClick}

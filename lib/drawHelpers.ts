@@ -280,7 +280,7 @@ export function drawOverlays(
     }
     container.addChild(overlay);
   }
-}
+} 
 
 /*
 ====================

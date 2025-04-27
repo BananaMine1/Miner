@@ -1,11 +1,12 @@
 // components/Header.tsx
 import React, { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useDisconnect } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import WalletModal from './WalletModal';
 
 export default function Header({ bnana = 0 }: { bnana?: number }) {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  const { disconnect } = useDisconnect();
   const [open, setOpen] = useState(false);
 
   return (
@@ -27,7 +28,12 @@ export default function Header({ bnana = 0 }: { bnana?: number }) {
         )}
       </header>
 
-      <WalletModal open={open} onClose={() => setOpen(false)} bnana={bnana} />
+      <WalletModal
+        open={open}
+        onClose={() => setOpen(false)}
+        wallet={address || ''}
+        onDisconnect={disconnect}
+      />
     </>
   );
 }

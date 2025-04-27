@@ -1,4 +1,5 @@
 import { Sprite as PixiSprite, Container as PixiContainer, TilingSprite as PixiTilingSprite } from 'pixi.js';
+import * as React from 'react';
 
 declare global {
   namespace JSX {

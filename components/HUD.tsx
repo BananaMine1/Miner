@@ -6,6 +6,8 @@ import { sanitizeInput } from '../lib/sanitize';
 import ProfileModal from './ProfileModal';
 import WalletModal from './WalletModal';
 import WattPriceDisplay from './WattPriceDisplay';
+import { useMediaQuery } from 'react-responsive';
+import MobileHUDMenu from './MobileHUDMenu';
 
 interface HUDProps {
   onOpenRoomModal?: () => void;
@@ -30,6 +32,8 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
   } = useGameState();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
 
   const {
     currentPrice,
@@ -75,8 +79,48 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
     return <div className="fixed top-0 left-0 w-full z-50 bg-red-900 bg-opacity-90 flex items-center justify-center text-white text-xl">{error}</div>;
   }
 
+  // Mobile HUD: logo, BNANA, menu button
+  if (isMobile) {
+    return (
+      <div className="fixed top-0 left-0 w-full z-20 flex items-center justify-between px-2 py-2 bg-black bg-opacity-70 pointer-events-auto">
+        <img src="/assets/logo.png" alt="Banana Miners Logo" className="h-8 w-auto" />
+        <span className="flex items-center gap-1 text-yellow-200 font-bold text-base">
+          <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-5 h-5 inline-block" />
+          {bnana.toFixed(2)}
+        </span>
+        <button
+          className="bg-yellow-400 text-green-900 px-3 py-1 rounded text-xl font-bold shadow hover:scale-105 transition"
+          onClick={() => setShowMobileMenu(true)}
+          aria-label="Open Menu"
+        >
+          ☰
+        </button>
+        {showMobileMenu && (
+          <MobileHUDMenu
+            onClose={() => setShowMobileMenu(false)}
+            profile={profile}
+            address={address}
+            shortAddress={shortAddress}
+            bnana={bnana}
+            usedWatts={usedWatts}
+            maxWatts={maxWatts}
+            yourHashrate={yourHashrate}
+            liveUnclaimed={liveUnclaimed}
+            canClaimStreak={canClaimStreak}
+            onClaim={claimRewards}
+            onOpenRoomModal={onOpenRoomModal}
+            onOpenProfile={() => setShowProfileModal(true)}
+            onOpenWallet={() => setShowWalletModal(true)}
+            onOpenLeaderboard={handleOpenLeaderboard}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Desktop HUD (unchanged)
   return (
-    <div className="absolute top-0 left-0 w-full z-20 flex flex-col md:flex-row justify-end p-3 gap-4">
+    <div className="fixed top-0 left-0 w-full z-20 flex flex-col md:flex-row justify-end p-2 md:p-3 gap-2 md:gap-4 pointer-events-none">
       <ProfileModal
         open={showProfileModal}
         onClose={() => setShowProfileModal(false)}
@@ -84,9 +128,6 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
         initialUsername={profile?.username || null}
         initialAvatarUrl={profile?.avatarUrl || null}
         initialBio={profile?.bio || null}
-        onProfileUpdate={(newUsername, newAvatarUrl, newBio) => {
-          updateProfile({ username: newUsername, avatarUrl: newAvatarUrl, bio: newBio });
-        }}
       />
       <WalletModal
         open={showWalletModal}
@@ -94,13 +135,13 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
         wallet={address || ''}
         onDisconnect={disconnect}
       />
-      <div className="flex justify-between items-center px-6 py-4 bg-transparent text-white text-sm font-bold w-full overflow-x-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-center px-2 sm:px-4 py-2 sm:py-3 bg-transparent text-white text-sm font-bold w-full gap-2 sm:gap-4 pointer-events-auto">
         {/* Left: Logo + user profile */}
-        <div className="flex items-center gap-3">
-          <img src="/assets/logo.png" alt="Banana Miners Logo" className="h-14 w-auto" />
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto mb-2 sm:mb-0">
+          <img src="/assets/logo.png" alt="Banana Miners Logo" className="h-10 sm:h-14 w-auto" />
           {/* Avatar (clickable) */}
           <div
-            className="w-10 h-10 rounded-full border-2 border-yellow-400 overflow-hidden cursor-pointer flex-shrink-0"
+            className="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-yellow-400 overflow-hidden cursor-pointer flex-shrink-0"
             onClick={() => setShowProfileModal(true)}
             title="Edit profile"
             style={{ minWidth: '2.5rem', minHeight: '2.5rem' }}
@@ -118,7 +159,7 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
           {/* Username (clickable) */}
           {profile?.username && (
             <span
-              className="cursor-pointer hover:underline truncate max-w-[120px] md:max-w-[200px]"
+              className="cursor-pointer hover:underline truncate max-w-[80px] sm:max-w-[120px] md:max-w-[200px]"
               onClick={() => setShowProfileModal(true)}
               title="Edit profile"
             >
@@ -128,13 +169,13 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
           {/* Wallet button */}
           <button
             onClick={handleWalletButtonClick}
-            className="ml-2 bg-yellow-400 text-green-900 px-2 py-1 rounded hover:scale-105 transition flex-shrink-0"
+            className="ml-1 sm:ml-2 bg-yellow-400 text-green-900 px-2 py-1 rounded hover:scale-105 transition flex-shrink-0 text-xs sm:text-sm"
           >
             {address ? shortAddress : 'Connect Wallet'}
           </button>
         </div>
         {/* Right: stats & actions */}
-        <div className="space-x-4 flex items-center flex-wrap">
+        <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 w-full sm:w-auto">
           <span className="flex-shrink-0">🔌 {usedWatts}/{maxWatts}W</span>
           <span className="flex-shrink-0">💰 {bnana.toFixed(2)} $BNANA</span>
           <WattPriceDisplay
@@ -146,26 +187,26 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
           {/* Leaderboard Button */}
           <button
             onClick={handleOpenLeaderboard}
-            className="bg-yellow-400 text-green-900 px-3 py-1 rounded hover:scale-105 transition flex-shrink-0"
+            className="bg-yellow-400 text-green-900 px-2 sm:px-3 py-1 rounded hover:scale-105 transition flex-shrink-0 text-xs sm:text-sm"
           >
             🏆 Leaderboard
           </button>
           <button
             onClick={onOpenRoomModal}
-            className="bg-yellow-400 text-green-900 px-3 py-1 rounded hover:scale-105 transition flex-shrink-0"
+            className="bg-yellow-400 text-green-900 px-2 sm:px-3 py-1 rounded hover:scale-105 transition flex-shrink-0 text-xs sm:text-sm"
           >
             Room Info
           </button>
           <button
             onClick={claimRewards}
-            className="bg-yellow-400 text-green-900 px-3 py-1 rounded hover:scale-105 transition flex-shrink-0"
+            className="bg-yellow-400 text-green-900 px-2 sm:px-3 py-1 rounded hover:scale-105 transition flex-shrink-0 text-xs sm:text-sm"
           >
             Claim {liveUnclaimed > 0 ? `+${liveUnclaimed.toFixed(2)}` : ''}
           </button>
           {canClaimStreak && (
             <button
               onClick={() => {}}
-              className="bg-yellow-400 text-green-900 px-3 py-1 rounded hover:scale-105 transition flex-shrink-0"
+              className="bg-yellow-400 text-green-900 px-2 sm:px-3 py-1 rounded hover:scale-105 transition flex-shrink-0 text-xs sm:text-sm"
             >
               🌞 Claim Daily (+1)
             </button>

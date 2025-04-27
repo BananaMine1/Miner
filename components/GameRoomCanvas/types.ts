@@ -1,3 +1,5 @@
+import * as PIXI from 'pixi.js';
+
 // Shared types for GameRoomCanvas and subcomponents
 
 export interface GridCorner {
