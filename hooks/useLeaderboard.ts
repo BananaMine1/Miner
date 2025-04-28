@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabaseClient';
 
 export async function fetchTopPlayers(limit = 50) {
   const { data, error } = await supabase
-    .from('leaderboard')
+    .from('leaderboard_view')
     .select('*')
     .order('total_earned', { ascending: false })
     .limit(limit);

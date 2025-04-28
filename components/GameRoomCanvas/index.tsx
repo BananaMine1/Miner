@@ -7,6 +7,7 @@ import PixiBackgroundLayer from './PixiBackgroundLayer';
 import { GameRoomCanvasProps, GridConfig } from './types';
 import { useResponsiveGridConfig } from './useResponsiveGridConfig';
 import { generateSlots } from './slotGenerator';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 const GameRoomCanvas: React.FC<GameRoomCanvasProps> = (props) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -16,14 +17,16 @@ const GameRoomCanvas: React.FC<GameRoomCanvasProps> = (props) => {
   const fpsTextRef = useRef<PIXI.Text | null>(null);
   const [bgSprite, setBgSprite] = useState<PIXI.Sprite | null>(null);
 
+  const isMobile = useIsMobile();
+
   // Responsive grid config
   const gridConfig = useResponsiveGridConfig(
     app,
     bgSprite,
     Number(props.roomLevel) || 0,
-    props.gridConfig.rows,
-    props.gridConfig.cols,
-    props.gridConfig.cellSize
+    isMobile ? 4 : props.gridConfig.rows,
+    isMobile ? 4 : props.gridConfig.cols,
+    isMobile ? 48 : props.gridConfig.cellSize
   );
 
   // Compute origin, rightVec, upVec from gridConfig corners
@@ -76,10 +79,10 @@ const GameRoomCanvas: React.FC<GameRoomCanvasProps> = (props) => {
 
   // Add ROOM_BACKGROUNDS array for use in fallback overlay
   const ROOM_BACKGROUNDS = [
-    '/assets/rooms/shack.jpg',
-    '/assets/rooms/swamp_shed.jpg',
-    '/assets/rooms/jungle_garage.jpg',
-    '/assets/rooms/tech_lab.jpg',
+    isMobile ? '/assets/rooms/shack-mobile.png' : '/assets/rooms/shack.jpg',
+    isMobile ? '/assets/rooms/swamp_shed-mobile.png' : '/assets/rooms/swamp_shed.jpg',
+    isMobile ? '/assets/rooms/jungle_garage-mobile.png' : '/assets/rooms/jungle_garage.jpg',
+    isMobile ? '/assets/rooms/tech_lab-mobile.png' : '/assets/rooms/tech_lab.jpg',
   ];
 
   useEffect(() => {

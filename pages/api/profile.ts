@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { validateCsrf } from '../../lib/csrf';
+import { ethers } from 'ethers';
 
 function validateProfileInput(body: any) {
   const errors: string[] = [];
@@ -13,6 +14,15 @@ function validateProfileInput(body: any) {
   if (body.avatar_url !== null && typeof body.avatar_url !== 'string') {
     errors.push('Avatar URL must be a string or null.');
   }
+  if (!body.wallet || typeof body.wallet !== 'string') {
+    errors.push('Missing wallet address.');
+  }
+  if (!body.signature || typeof body.signature !== 'string') {
+    errors.push('Missing signature.');
+  }
+  if (!body.message || typeof body.message !== 'string') {
+    errors.push('Missing message.');
+  }
   return errors;
 }
 
@@ -20,13 +30,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== 'POST' && req.method !== 'PUT') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
-  // Require Bearer token in Authorization header
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Missing or invalid Authorization header' });
-  }
-  const token = authHeader.replace('Bearer ', '');
 
   // CSRF protection
   try {
@@ -41,28 +44,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: errors.join(' ') });
   }
 
-  // Create a Supabase client with the user's JWT for RLS
+  const { wallet, signature, message, username, bio, avatar_url } = req.body;
+
+  // Verify signature
+  let recoveredAddress;
+  try {
+    recoveredAddress = ethers.utils.verifyMessage(message, signature);
+  } catch (err) {
+    return res.status(400).json({ error: 'Invalid signature.' });
+  }
+  if (recoveredAddress.toLowerCase() !== wallet.toLowerCase()) {
+    return res.status(401).json({ error: 'Signature does not match wallet.' });
+  }
+
+  // Create a Supabase client with the service key
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  const userSupabase = createClient(supabaseUrl, supabaseServiceKey, {
-    global: { headers: { Authorization: `Bearer ${token}` } }
-  });
-
-  // Get user wallet from JWT
-  const { data: user, error: userError } = await userSupabase.auth.getUser();
-  if (userError || !user) {
-    return res.status(401).json({ error: 'Invalid or expired token' });
-  }
-  const wallet = user.user?.identities?.[0]?.identity_data?.sub || user.user?.id;
-  if (!wallet) {
-    return res.status(400).json({ error: 'Could not determine wallet from token.' });
-  }
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   // Update profile in Supabase
-  const { error } = await userSupabase.from('players').update({
-    username: req.body.username,
-    bio: req.body.bio,
-    avatar_url: req.body.avatar_url,
+  const { error } = await supabase.from('players').update({
+    username,
+    bio,
+    avatar_url,
   }).eq('wallet', wallet);
 
   if (error) {

@@ -8,6 +8,7 @@ import WalletModal from './WalletModal';
 import WattPriceDisplay from './WattPriceDisplay';
 import { useMediaQuery } from 'react-responsive';
 import MobileHUDMenu from './MobileHUDMenu';
+import LoadingScreen from './LoadingScreen';
 
 interface HUDProps {
   onOpenRoomModal?: () => void;
@@ -29,6 +30,7 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
     error,
     claimRewards,
     updateProfile,
+    refresh,
   } = useGameState();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
@@ -73,7 +75,7 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
   };
 
   if (loading) {
-    return <div className="fixed top-0 left-0 w-full z-50 bg-black bg-opacity-60 flex items-center justify-center text-white text-xl">Loading game state…</div>;
+    return <LoadingScreen />;
   }
   if (error) {
     return <div className="fixed top-0 left-0 w-full z-50 bg-red-900 bg-opacity-90 flex items-center justify-center text-white text-xl">{error}</div>;
@@ -128,6 +130,7 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
         initialUsername={profile?.username || null}
         initialAvatarUrl={profile?.avatarUrl || null}
         initialBio={profile?.bio || null}
+        refreshProfile={refresh}
       />
       <WalletModal
         open={showWalletModal}
