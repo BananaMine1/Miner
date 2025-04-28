@@ -3,6 +3,7 @@ import { supabase } from './supabaseClient';
 import { useWallet } from './WalletContext';
 import { roomLevels } from './gamedata';
 import { getUpgradeCost, getXpToNext, getRepairCost, getUpgradedHash, getUpgradedWatts } from './minerUtils';
+import type { Miner } from './types';
 
 // --- Types ---
 export interface PlayerProfile {
@@ -10,20 +11,6 @@ export interface PlayerProfile {
   username: string;
   avatarUrl: string | null;
   bio: string | null;
-}
-
-export interface Miner {
-  instanceId: string;
-  type: string;
-  position: number;
-  image: string;
-  xp: number;
-  level: number;
-  durability: number;
-  overheated: boolean;
-  boosted: boolean;
-  watts: number;
-  price?: number;
 }
 
 export interface GameState {

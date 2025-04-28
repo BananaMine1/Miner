@@ -3,11 +3,13 @@ import { miners } from '../lib/gamedata';
 import type { Miner } from '../lib/types';
 import { useGameState } from '../lib/GameStateContext';
 
-// Infer the type of a miner template from the miners array
-export type MinerTemplate = typeof miners[number];
+// Infer the type of a miner template from the miners array and add optional properties
+export type MinerTemplate = typeof miners[number] & {
+  specialAbility?: string;
+};
 
 interface BuyMinerModalProps {
-  onBuy: (miner: Miner) => void;
+  onBuy: (miner: MinerTemplate) => void;
   onClose: () => void;
   usedWatts: number;
   maxWatts: number;
@@ -32,7 +34,7 @@ export default function BuyMinerModal({ onBuy, onClose, usedWatts, maxWatts }: B
   const { miners: ownedMiners, bnana } = useGameState();
 
   function ownedCount(miner: MinerTemplate) {
-    return ownedMiners.filter(m => m.id && m.id === miner.id).length;
+    return ownedMiners.filter((m) => 'id' in m && m.id === miner.id).length;
   }
 
   return (
@@ -42,7 +44,7 @@ export default function BuyMinerModal({ onBuy, onClose, usedWatts, maxWatts }: B
         <h2 className="text-2xl font-bold mb-6 text-center tracking-wide">Buy Miners</h2>
         <div className="flex-1 overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {miners.map((m) => {
+            {miners.map((m: MinerTemplate) => {
               const wouldExceed = usedWatts + m.watts > maxWatts;
               const notEnoughBnana = bnana < m.price;
               const disabled = wouldExceed || notEnoughBnana;

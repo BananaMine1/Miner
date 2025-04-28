@@ -6,6 +6,8 @@ export interface Miner {
   watts: number;
   image: string;
   position: number;
+  price: number;
+  description?: string;
   xp?: number;
   overheated?: boolean;
   durability?: number;
@@ -15,4 +17,5 @@ export interface Miner {
   baseUpgradeCost?: number;
   baseRepairRate?: number;
   specialAbility?: string;
+  boosted?: boolean;
 }
