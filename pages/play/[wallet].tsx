@@ -96,6 +96,7 @@ export default function PlayWalletPage({ wallet, gridConfig: initialGridConfig }
     const filtered = miners.filter(m => m.position !== position);
     const newMiner = {
       ...minerType,
+      id: minerType.id,
       position,
       instanceId: uuidv4(),
       image: minerType.image || '/assets/miner/miner-3.png',

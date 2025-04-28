@@ -32,7 +32,7 @@ export default function BuyMinerModal({ onBuy, onClose, usedWatts, maxWatts }: B
   const { miners: ownedMiners, bnana } = useGameState();
 
   function ownedCount(miner: MinerTemplate) {
-    return ownedMiners.filter(m => m.id === miner.id).length;
+    return ownedMiners.filter(m => m.id && m.id === miner.id).length;
   }
 
   return (
