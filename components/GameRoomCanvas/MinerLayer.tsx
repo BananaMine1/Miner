@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 import { Slot, MinerLayerProps } from './types';
 
-const MINER_OFFSET_X = -5; // Adjust as needed for perfect centering
-const MINER_OFFSET_Y = 30; // Adjust as needed for perfect centering
+const MINER_OFFSET_X = 2; // Adjust as needed for perfect centering
+const MINER_OFFSET_Y = 24; // Adjust as needed for perfect centering
 
 const MinerLayer: React.FC<MinerLayerProps> = ({
   gameLayer,
@@ -12,6 +12,8 @@ const MinerLayer: React.FC<MinerLayerProps> = ({
   onMinerClick,
   draggedMinerId,
   dragPos,
+  isMobile = false,
+  roomLevel = 0,
 }) => {
   const minerContainerRef = useRef<PIXI.Container | null>(null);
 
@@ -36,7 +38,7 @@ const MinerLayer: React.FC<MinerLayerProps> = ({
       sprite.anchor.set(0.5, 1); // base sits on slot
       sprite.x = slot.screenPos.x + MINER_OFFSET_X;
       sprite.y = slot.screenPos.y + MINER_OFFSET_Y;
-      sprite.scale.set(0.25);
+      sprite.scale.set(isMobile && roomLevel === 0 ? 0.17 : 0.25);
       // Set hitArea to the tile polygon
       const points = slot.screenCorners.flatMap(corner => [corner.x, corner.y]);
       sprite.hitArea = new PIXI.Polygon(points);
@@ -56,7 +58,7 @@ const MinerLayer: React.FC<MinerLayerProps> = ({
         ghost.anchor.set(0.5, 1);
         ghost.x = dragPos.x + MINER_OFFSET_X;
         ghost.y = dragPos.y + MINER_OFFSET_Y;
-        ghost.scale.set(0.25);
+        ghost.scale.set(isMobile && roomLevel === 0 ? 0.18 : 0.25);
         ghost.alpha = 0.7;
         minerContainer.addChild(ghost);
       }
@@ -69,7 +71,7 @@ const MinerLayer: React.FC<MinerLayerProps> = ({
         minerContainerRef.current = null;
       }
     };
-  }, [gameLayer, slots, draggedMinerId, dragPos, onMinerDragStart, onMinerClick]);
+  }, [gameLayer, slots, draggedMinerId, dragPos, onMinerDragStart, onMinerClick, isMobile, roomLevel]);
 
   return null;
 };

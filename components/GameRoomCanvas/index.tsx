@@ -20,13 +20,15 @@ const GameRoomCanvas: React.FC<GameRoomCanvasProps> = (props) => {
   const isMobile = useIsMobile();
 
   // Responsive grid config
+  const isFirstRoomMobile = isMobile && (Number(props.roomLevel) === 0);
   const gridConfig = useResponsiveGridConfig(
     app,
     bgSprite,
     Number(props.roomLevel) || 0,
-    isMobile ? 4 : props.gridConfig.rows,
-    isMobile ? 4 : props.gridConfig.cols,
-    isMobile ? 48 : props.gridConfig.cellSize
+    isFirstRoomMobile ? 2 : props.gridConfig.rows,
+    isFirstRoomMobile ? 2 : props.gridConfig.cols,
+    isFirstRoomMobile ? 48 : props.gridConfig.cellSize,
+    isMobile
   );
 
   // Compute origin, rightVec, upVec from gridConfig corners
@@ -229,7 +231,7 @@ const GameRoomCanvas: React.FC<GameRoomCanvasProps> = (props) => {
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
-      <PixiBackgroundLayer app={app} roomLevel={Number(props.roomLevel) || 0} onSpriteReady={setBgSprite} />
+      <PixiBackgroundLayer app={app} roomLevel={Number(props.roomLevel) || 0} onSpriteReady={setBgSprite} isMobile={isMobile} />
       <GridLayer gameLayer={gameLayer} gridConfig={gridConfig} />
       <>
         {gameLayer && (
@@ -244,10 +246,14 @@ const GameRoomCanvas: React.FC<GameRoomCanvasProps> = (props) => {
         {gameLayer && (
       <MinerLayer
         gameLayer={gameLayer}
-            slots={slots}
-            onMinerDragStart={handleMinerDragStart}
-            onMinerClick={handleMinerClick}
-          />
+        slots={slots}
+        onMinerDragStart={handleMinerDragStart}
+        onMinerClick={handleMinerClick}
+        draggedMinerId={props.draggedMiner}
+        dragPos={props.dragPos}
+        isMobile={isMobile}
+        roomLevel={Number(props.roomLevel) || 0}
+      />
         )}
       </>
     </div>

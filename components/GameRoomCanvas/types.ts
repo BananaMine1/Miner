@@ -72,4 +72,6 @@ export interface MinerLayerProps {
   onMinerClick: (slot: Slot) => void;
   draggedMinerId?: string | null;
   dragPos?: { x: number; y: number } | null;
+  isMobile?: boolean;
+  roomLevel?: number;
 } 

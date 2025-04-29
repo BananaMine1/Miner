@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { sanitizeInput } from '../lib/sanitize';
 import leaderboardBg from '../public/assets/backgrounds/leaderboard.png';
 import { fetchTopPlayers } from '../hooks/useLeaderboard';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface Player {
   id: string;
@@ -34,6 +35,7 @@ function Medal({ rank }: { rank: number }) {
 function Leaderboard() {
   const [players, setPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const isMobile = useIsMobile();
 
   const AVATAR_PLACEHOLDER = '/assets/avatar-placeholder.png';
 
@@ -57,99 +59,170 @@ function Leaderboard() {
         <div
           className="relative"
           style={{
-            width: '100vw',
-            height: '56.25vw', // 16:9 aspect ratio (1080/1920 = 0.5625)
-            maxWidth: '1920px',
-            maxHeight: '1080px',
-            aspectRatio: '16/9',
+            width: isMobile ? '100vw' : '100vw',
+            height: isMobile ? '100dvh' : '56.25vw',
+            maxWidth: isMobile ? '100vw' : '100vw',
+            maxHeight: isMobile ? '100dvh' : '100vh',
+            aspectRatio: isMobile ? undefined : '16/9',
           }}
         >
           <img
-            src="/assets/backgrounds/leaderboard2.png"
+            src={isMobile ? '/assets/backgrounds/mobile-leaderboard.png' : '/assets/backgrounds/leaderboard2.png'}
             alt="Leaderboard background"
             className="absolute inset-0 w-full h-full"
-            style={{ pointerEvents: 'none', userSelect: 'none', objectFit: 'fill' }}
+            style={{ pointerEvents: 'none', userSelect: 'none', objectFit: 'fill', zIndex: 0 }}
             draggable={false}
           />
-          {/* Top 3 - Each absolutely positioned for pixel-perfect placement */}
-          {/* Silver (#2) */}
-          <div
-            className="absolute"
-            style={{
-              left: '37%', // user custom
-              top: '39%',
-              width: '12%',
-              textAlign: 'center',
-            }}
-          >
-            <div className="flex items-center justify-center gap-4">
-              <img
-                src={topThree[1]?.avatar_url || AVATAR_PLACEHOLDER}
-                onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
-                alt={(topThree[1]?.username || topThree[1]?.wallet) + ' avatar'}
-                className="w-14 h-14 rounded-full border-4 border-yellow-400 bg-green-900"
-              />
-              <span className="text-base font-bold text-yellow-200 truncate">{sanitizeInput(topThree[1]?.username || topThree[1]?.wallet?.slice(0, 8) || 'Unknown')}</span>
-              <div style={{ minWidth: 24 }} />
-              {topThree[1]?.hashrate && (
-                <span className="text-base text-green-200 font-mono ml-4">{topThree[1].hashrate} GH/s</span>
-              )}
+          {/* Top 3 Placement */}
+          {isMobile ? (
+            <div className="flex flex-col items-center gap-4 mt-8 w-full z-20 relative">
+              {/* Gold (#1) */}
+              <div className="flex flex-col items-center">
+                <img
+                  src={topThree[0]?.avatar_url || AVATAR_PLACEHOLDER}
+                  onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
+                  alt={(topThree[0]?.username || topThree[0]?.wallet) + ' avatar'}
+                  className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-yellow-400 bg-green-900 mb-2"
+                  style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
+                />
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <span style={{ fontSize: '5vw' }} className="font-bold text-yellow-200 truncate">{sanitizeInput(topThree[0]?.username || topThree[0]?.wallet?.slice(0, 8) || 'Unknown')}</span>
+                  {topThree[0]?.hashrate && (
+                    <span style={{ fontSize: '3vw' }} className="text-green-200 font-mono ml-2">{topThree[0].hashrate} GH/s</span>
+                  )}
+                </div>
+              </div>
+              {/* Silver (#2) */}
+              <div className="flex flex-col items-center">
+                <img
+                  src={topThree[1]?.avatar_url || AVATAR_PLACEHOLDER}
+                  onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
+                  alt={(topThree[1]?.username || topThree[1]?.wallet) + ' avatar'}
+                  className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-gray-400 bg-green-900 mb-2"
+                  style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
+                />
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <span style={{ fontSize: '4vw' }} className="font-bold text-yellow-200 truncate">{sanitizeInput(topThree[1]?.username || topThree[1]?.wallet?.slice(0, 8) || 'Unknown')}</span>
+                  {topThree[1]?.hashrate && (
+                    <span style={{ fontSize: '2.5vw' }} className="text-green-200 font-mono ml-2">{topThree[1].hashrate} GH/s</span>
+                  )}
+                </div>
+              </div>
+              {/* Bronze (#3) */}
+              <div className="flex flex-col items-center">
+                <img
+                  src={topThree[2]?.avatar_url || AVATAR_PLACEHOLDER}
+                  onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
+                  alt={(topThree[2]?.username || topThree[2]?.wallet) + ' avatar'}
+                  className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-orange-700 bg-green-900 mb-2"
+                  style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
+                />
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <span style={{ fontSize: '3vw' }} className="font-bold text-yellow-200 truncate">{sanitizeInput(topThree[2]?.username || topThree[2]?.wallet?.slice(0, 8) || 'Unknown')}</span>
+                  {topThree[2]?.hashrate && (
+                    <span style={{ fontSize: '2vw' }} className="text-green-200 font-mono ml-2">{topThree[2].hashrate} GH/s</span>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-
-          {/* Gold (#1) */}
+          ) : (
+            <>
+              {/* Silver (#2) */}
+              <div
+                className="absolute"
+                style={{
+                  left: '40%',
+                  top: '39%',
+                  width: '12%',
+                  textAlign: 'center',
+                  zIndex: 10,
+                }}
+              >
+                <div className="flex items-center justify-center gap-4">
+                  <img
+                    src={topThree[1]?.avatar_url || AVATAR_PLACEHOLDER}
+                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
+                    alt={(topThree[1]?.username || topThree[1]?.wallet) + ' avatar'}
+                    className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-yellow-400 bg-green-900"
+                    style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
+                  />
+                  <div className="flex items-center justify-center gap-2">
+                    <span style={{ fontSize: '1.5vw' }} className="font-bold text-yellow-200 truncate">{sanitizeInput(topThree[1]?.username || topThree[1]?.wallet?.slice(0, 8) || 'Unknown')}</span>
+                    {topThree[1]?.hashrate && (
+                      <span style={{ fontSize: '1vw' }} className="text-green-200 font-mono ml-2">{topThree[1].hashrate} GH/s</span>
+                    )}
+                  </div>
+                  <div style={{ minWidth: '8%' }} />
+                </div>
+              </div>
+              {/* Gold (#1) */}
+              <div
+                className="absolute"
+                style={{
+                  left: '37%',
+                  top: '29.8%',
+                  width: '12%',
+                  textAlign: 'center',
+                  zIndex: 10,
+                }}
+              >
+                <div className="flex items-center justify-center gap-4">
+                  <img
+                    src={topThree[0]?.avatar_url || AVATAR_PLACEHOLDER}
+                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
+                    alt={(topThree[0]?.username || topThree[0]?.wallet) + ' avatar'}
+                    className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-yellow-400 bg-green-900"
+                    style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
+                  />
+                  <div className="flex items-center justify-center gap-2">
+                    <span style={{ fontSize: '2vw' }} className="font-bold text-yellow-200 truncate">{sanitizeInput(topThree[0]?.username || topThree[0]?.wallet?.slice(0, 8) || 'Unknown')}</span>
+                    {topThree[0]?.hashrate && (
+                      <span style={{ fontSize: '1.2vw' }} className="text-green-200 font-mono ml-2">{topThree[0].hashrate} GH/s</span>
+                    )}
+                  </div>
+                  <div style={{ minWidth: '10%' }} />
+                </div>
+              </div>
+              {/* Bronze (#3) */}
+              <div
+                className="absolute"
+                style={{
+                  left: '38%',
+                  top: '47%',
+                  width: '12%',
+                  textAlign: 'center',
+                  zIndex: 10,
+                }}
+              >
+                <div className="flex items-center justify-center gap-4">
+                  <img
+                    src={topThree[2]?.avatar_url || AVATAR_PLACEHOLDER}
+                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
+                    alt={(topThree[2]?.username || topThree[2]?.wallet) + ' avatar'}
+                    className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-yellow-400 bg-green-900"
+                    style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
+                  />
+                  <div className="flex items-center justify-center gap-2">
+                    <span style={{ fontSize: '1.2vw' }} className="font-bold text-yellow-200 truncate">{sanitizeInput(topThree[2]?.username || topThree[2]?.wallet?.slice(0, 8) || 'Unknown')}</span>
+                    {topThree[2]?.hashrate && (
+                      <span style={{ fontSize: '0.9vw' }} className="text-green-200 font-mono ml-2">{topThree[2].hashrate} GH/s</span>
+                    )}
+                  </div>
+                  <div style={{ minWidth: '8%' }} />
+                </div>
+              </div>
+            </>
+          )}
+          {/* Scrollable Section Placement */}
           <div
-            className="absolute"
-            style={{
-              left: '37%', // user custom
-              top: '29.8%',
-              width: '12%',
-              textAlign: 'center',
-            }}
+            className={isMobile ? "relative w-full mt-4 px-2" : "absolute left-[45%] bottom-[2.5%] w-[45%] h-[38%] -translate-x-1/2 flex flex-col justify-start"}
+            style={isMobile ? { height: '60dvh', maxHeight: 400, zIndex: 10 } : { zIndex: 10 }}
+            aria-label="Leaderboard list"
           >
-            <div className="flex items-center justify-center gap-4">
-              <img
-                src={topThree[0]?.avatar_url || AVATAR_PLACEHOLDER}
-                onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
-                alt={(topThree[0]?.username || topThree[0]?.wallet) + ' avatar'}
-                className="w-16 h-16 rounded-full border-4 border-yellow-400 bg-green-900"
-              />
-              <span className="text-lg font-bold text-yellow-200 truncate">{sanitizeInput(topThree[0]?.username || topThree[0]?.wallet?.slice(0, 8) || 'Unknown')}</span>
-              <div style={{ minWidth: 32 }} />
-              {topThree[0]?.hashrate && (
-                <span className="text-lg text-green-200 font-mono ml-4">{topThree[0].hashrate} GH/s</span>
-              )}
-            </div>
-          </div>
-
-          {/* Bronze (#3) */}
-          <div
-            className="absolute"
-            style={{
-              left: '37%', // user custom
-              top: '47%',
-              width: '12%',
-              textAlign: 'center',
-            }}
-          >
-            <div className="flex items-center justify-center gap-4">
-              <img
-                src={topThree[2]?.avatar_url || AVATAR_PLACEHOLDER}
-                onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
-                alt={(topThree[2]?.username || topThree[2]?.wallet) + ' avatar'}
-                className="w-14 h-14 rounded-full border-4 border-yellow-400 bg-green-900"
-              />
-              <span className="text-base font-bold text-yellow-200 truncate">{sanitizeInput(topThree[2]?.username || topThree[2]?.wallet?.slice(0, 8) || 'Unknown')}</span>
-              <div style={{ minWidth: 24 }} />
-              {topThree[2]?.hashrate && (
-                <span className="text-base text-green-200 font-mono ml-4">{topThree[2].hashrate} GH/s</span>
-              )}
-            </div>
-          </div>
-
-          {/* Lower Box: Scrollable Table, perfectly aligned */}
-          <div className="absolute left-[45%] bottom-[2.5%] w-[45%] h-[38%] -translate-x-1/2 flex flex-col justify-start" aria-label="Leaderboard list">
-            <div className="overflow-y-auto rounded-lg px-4 py-2" style={{ maxHeight: '280px' }}>
+            <div
+              className="overflow-y-auto rounded-lg px-2 py-2"
+              style={isMobile ? { maxHeight: '100%' } : { maxHeight: '28vw' }}
+            >
               <table className="w-full text-yellow-100 text-lg bg-transparent">
                 <thead>
                   <tr className="text-yellow-300 text-left sticky top-0 bg-transparent">
@@ -172,15 +245,17 @@ function Leaderboard() {
                     >
                       <td className="py-2 pl-2 font-bold w-12 bg-transparent">{idx + 4}</td>
                       <td className="py-2 bg-transparent">
-                        {player.avatar_url && (
+                        <div className="flex items-center gap-2">
                           <img
                             src={player.avatar_url || AVATAR_PLACEHOLDER}
                             onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
                             alt={(player.username || player.wallet) + ' avatar'}
-                            className="inline-block w-8 h-8 rounded-full border border-yellow-300 mr-2 align-middle"
+                            className="rounded-full object-cover flex-shrink-0 flex-grow-0 border border-yellow-300 align-middle"
+                            style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
                           />
-                        )}
-                        <span className="truncate max-w-[120px] align-middle">{sanitizeInput(player.username || player.wallet?.slice(0, 10) || 'Unknown')}</span>
+                          <span className="truncate max-w-[120px] align-middle">{sanitizeInput(player.username || player.wallet?.slice(0, 10) || 'Unknown')}</span>
+                          <span className="font-mono text-green-200 ml-2">{player.hashrate} GH/s</span>
+                        </div>
                       </td>
                       <td className="py-2 text-right pr-2 font-mono bg-transparent">{player.total_earned?.toFixed(2)} $BNANA</td>
                     </tr>

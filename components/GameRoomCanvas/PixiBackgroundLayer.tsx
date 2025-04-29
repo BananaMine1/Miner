@@ -5,6 +5,7 @@ interface PixiBackgroundLayerProps {
   app: PIXI.Application | null;
   roomLevel: number;
   onSpriteReady?: (sprite: PIXI.Sprite) => void;
+  isMobile?: boolean;
 }
 
 // Background images for each room tier
@@ -15,7 +16,7 @@ const ROOM_BACKGROUNDS = [
   '/assets/rooms/tech_lab.jpg',  // Tier 3: Tech Lab (future expansion)
 ];
 
-const PixiBackgroundLayer: React.FC<PixiBackgroundLayerProps> = ({ app, roomLevel = 0, onSpriteReady }) => {
+const PixiBackgroundLayer: React.FC<PixiBackgroundLayerProps> = ({ app, roomLevel = 0, onSpriteReady, isMobile }) => {
   const spriteRef = useRef<PIXI.Sprite | null>(null);
   const currentTexture = useRef<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +28,10 @@ const PixiBackgroundLayer: React.FC<PixiBackgroundLayerProps> = ({ app, roomLeve
     let resizeHandler: (() => void) | null = null;
     setError(null);
     // Get the appropriate background for the room level
-    const imageUrl = ROOM_BACKGROUNDS[roomLevel] || ROOM_BACKGROUNDS[0];
+    let imageUrl = ROOM_BACKGROUNDS[roomLevel] || ROOM_BACKGROUNDS[0];
+    if (isMobile && roomLevel === 0) {
+      imageUrl = '/assets/rooms/shack-mobile.png';
+    }
     (async () => {
       try {
         await PIXI.Assets.load(imageUrl);
@@ -71,7 +75,7 @@ const PixiBackgroundLayer: React.FC<PixiBackgroundLayerProps> = ({ app, roomLeve
         }
       }
     };
-  }, [app, roomLevel, onSpriteReady]);
+  }, [app, roomLevel, onSpriteReady, isMobile]);
 
   if (error) {
     return <div style={{ position: 'absolute', inset: 0, background: '#222', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>{error}</div>;

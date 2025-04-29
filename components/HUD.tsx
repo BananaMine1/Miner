@@ -87,7 +87,7 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
       <div className="fixed top-0 left-0 w-full z-20 flex items-center justify-between px-2 py-2 bg-black bg-opacity-70 pointer-events-auto">
         <img src="/assets/logo.png" alt="Banana Miners Logo" className="h-8 w-auto" />
         <span className="flex items-center gap-1 text-yellow-200 font-bold text-base">
-          <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-5 h-5 inline-block" />
+          <span role="img" aria-label="BNANA">🍌</span>
           {bnana.toFixed(2)}
         </span>
         <button
