@@ -19,6 +19,7 @@ interface Player {
   }>;
   username?: string;
   avatar_url?: string;
+  xp?: number;
 }
 
 function Medal({ rank }: { rank: number }) {
@@ -32,8 +33,14 @@ function Medal({ rank }: { rank: number }) {
   );
 }
 
+// Helper for top 3 username display
+function getTop3DisplayName(nameOrWallet: string | undefined) {
+  if (!nameOrWallet) return 'Unknown';
+  return nameOrWallet.length < 10 ? nameOrWallet : nameOrWallet.slice(0, 8);
+}
+
 function Leaderboard() {
-  const [players, setPlayers] = useState<any[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
   const isMobile = useIsMobile();
 
@@ -77,52 +84,55 @@ function Leaderboard() {
           {isMobile ? (
             <div className="flex flex-col items-center gap-4 mt-8 w-full z-20 relative">
               {/* Gold (#1) */}
-              <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center gap-6 mt-2">
                 <img
                   src={topThree[0]?.avatar_url || AVATAR_PLACEHOLDER}
                   onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
                   alt={(topThree[0]?.username || topThree[0]?.wallet) + ' avatar'}
-                  className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-yellow-400 bg-green-900 mb-2"
+                  className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-yellow-400 bg-green-900"
                   style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
                 />
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <span style={{ fontSize: '5vw' }} className="font-bold text-yellow-200 truncate">{sanitizeInput(topThree[0]?.username || topThree[0]?.wallet?.slice(0, 8) || 'Unknown')}</span>
-                  {topThree[0]?.hashrate && (
-                    <span style={{ fontSize: '3vw' }} className="text-green-200 font-mono ml-2">{topThree[0].hashrate} GH/s</span>
-                  )}
-                </div>
+                <span style={{ fontSize: isMobile ? '4vw' : '2vw' }} className="font-bold text-yellow-200">{sanitizeInput(getTop3DisplayName(topThree[0]?.username || topThree[0]?.wallet))}</span>
+                {topThree[0]?.hashrate && (
+                  <span style={{ fontSize: isMobile ? '4vw' : '2vw' }} className="text-green-200 font-mono ml-2">{topThree[0].hashrate} GH/s</span>
+                )}
+                {topThree[0]?.xp !== undefined && (
+                  <span style={{ fontSize: isMobile ? '4vw' : '2vw' }} className="text-blue-300 font-mono ml-2"><span role="img" aria-label="XP">⭐</span> {topThree[0].xp}</span>
+                )}
               </div>
               {/* Silver (#2) */}
-              <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center gap-6 mt-2">
                 <img
                   src={topThree[1]?.avatar_url || AVATAR_PLACEHOLDER}
                   onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
                   alt={(topThree[1]?.username || topThree[1]?.wallet) + ' avatar'}
-                  className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-gray-400 bg-green-900 mb-2"
+                  className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-gray-400 bg-green-900"
                   style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
                 />
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <span style={{ fontSize: '4vw' }} className="font-bold text-yellow-200 truncate">{sanitizeInput(topThree[1]?.username || topThree[1]?.wallet?.slice(0, 8) || 'Unknown')}</span>
-                  {topThree[1]?.hashrate && (
-                    <span style={{ fontSize: '2.5vw' }} className="text-green-200 font-mono ml-2">{topThree[1].hashrate} GH/s</span>
-                  )}
-                </div>
+                <span style={{ fontSize: isMobile ? '4vw' : '2vw' }} className="font-bold text-yellow-200">{sanitizeInput(getTop3DisplayName(topThree[1]?.username || topThree[1]?.wallet))}</span>
+                {topThree[1]?.hashrate && (
+                  <span style={{ fontSize: isMobile ? '4vw' : '2vw' }} className="text-green-200 font-mono ml-2">{topThree[1].hashrate} GH/s</span>
+                )}
+                {topThree[1]?.xp !== undefined && (
+                  <span style={{ fontSize: isMobile ? '4vw' : '2vw' }} className="text-blue-300 font-mono ml-2"><span role="img" aria-label="XP">⭐</span> {topThree[1].xp}</span>
+                )}
               </div>
               {/* Bronze (#3) */}
-              <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center gap-6 mt-2">
                 <img
                   src={topThree[2]?.avatar_url || AVATAR_PLACEHOLDER}
                   onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
                   alt={(topThree[2]?.username || topThree[2]?.wallet) + ' avatar'}
-                  className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-orange-700 bg-green-900 mb-2"
+                  className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-orange-700 bg-green-900"
                   style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
                 />
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <span style={{ fontSize: '3vw' }} className="font-bold text-yellow-200 truncate">{sanitizeInput(topThree[2]?.username || topThree[2]?.wallet?.slice(0, 8) || 'Unknown')}</span>
-                  {topThree[2]?.hashrate && (
-                    <span style={{ fontSize: '2vw' }} className="text-green-200 font-mono ml-2">{topThree[2].hashrate} GH/s</span>
-                  )}
-                </div>
+                <span style={{ fontSize: isMobile ? '4vw' : '2vw' }} className="font-bold text-yellow-200">{sanitizeInput(getTop3DisplayName(topThree[2]?.username || topThree[2]?.wallet))}</span>
+                {topThree[2]?.hashrate && (
+                  <span style={{ fontSize: isMobile ? '4vw' : '2vw' }} className="text-green-200 font-mono ml-2">{topThree[2].hashrate} GH/s</span>
+                )}
+                {topThree[2]?.xp !== undefined && (
+                  <span style={{ fontSize: isMobile ? '4vw' : '2vw' }} className="text-blue-300 font-mono ml-2"><span role="img" aria-label="XP">⭐</span> {topThree[2].xp}</span>
+                )}
               </div>
             </div>
           ) : (
@@ -131,14 +141,14 @@ function Leaderboard() {
               <div
                 className="absolute"
                 style={{
-                  left: '40%',
-                  top: '39%',
+                  left: '37%',
+                  top: '38.2%',
                   width: '12%',
                   textAlign: 'center',
                   zIndex: 10,
                 }}
               >
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center justify-center gap-6">
                   <img
                     src={topThree[1]?.avatar_url || AVATAR_PLACEHOLDER}
                     onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
@@ -146,10 +156,10 @@ function Leaderboard() {
                     className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-yellow-400 bg-green-900"
                     style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
                   />
-                  <div className="flex items-center justify-center gap-2">
-                    <span style={{ fontSize: '1.5vw' }} className="font-bold text-yellow-200 truncate">{sanitizeInput(topThree[1]?.username || topThree[1]?.wallet?.slice(0, 8) || 'Unknown')}</span>
+                  <div className="flex items-center justify-center gap-6">
+                    <span style={{ fontSize: isMobile ? '1.5vw' : '1vw' }} className="font-bold text-yellow-200">{sanitizeInput(getTop3DisplayName(topThree[1]?.username || topThree[1]?.wallet))}</span>
                     {topThree[1]?.hashrate && (
-                      <span style={{ fontSize: '1vw' }} className="text-green-200 font-mono ml-2">{topThree[1].hashrate} GH/s</span>
+                      <span style={{ fontSize: isMobile ? '1.5vw' : '1vw' }} className="text-green-200 font-mono ml-2">{topThree[1].hashrate} GH/s</span>
                     )}
                   </div>
                   <div style={{ minWidth: '8%' }} />
@@ -166,7 +176,7 @@ function Leaderboard() {
                   zIndex: 10,
                 }}
               >
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center justify-center gap-6">
                   <img
                     src={topThree[0]?.avatar_url || AVATAR_PLACEHOLDER}
                     onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
@@ -174,10 +184,10 @@ function Leaderboard() {
                     className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-yellow-400 bg-green-900"
                     style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
                   />
-                  <div className="flex items-center justify-center gap-2">
-                    <span style={{ fontSize: '2vw' }} className="font-bold text-yellow-200 truncate">{sanitizeInput(topThree[0]?.username || topThree[0]?.wallet?.slice(0, 8) || 'Unknown')}</span>
+                  <div className="flex items-center justify-center gap-6">
+                    <span style={{ fontSize: isMobile ? '1.5vw' : '1vw' }} className="font-bold text-yellow-200">{sanitizeInput(getTop3DisplayName(topThree[0]?.username || topThree[0]?.wallet))}</span>
                     {topThree[0]?.hashrate && (
-                      <span style={{ fontSize: '1.2vw' }} className="text-green-200 font-mono ml-2">{topThree[0].hashrate} GH/s</span>
+                      <span style={{ fontSize: isMobile ? '1.5vw' : '1vw' }} className="text-green-200 font-mono ml-2">{topThree[0].hashrate} GH/s</span>
                     )}
                   </div>
                   <div style={{ minWidth: '10%' }} />
@@ -187,14 +197,14 @@ function Leaderboard() {
               <div
                 className="absolute"
                 style={{
-                  left: '38%',
-                  top: '47%',
+                  left: '37%',
+                  top: '46.4%',
                   width: '12%',
                   textAlign: 'center',
                   zIndex: 10,
                 }}
               >
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center justify-center gap-6">
                   <img
                     src={topThree[2]?.avatar_url || AVATAR_PLACEHOLDER}
                     onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = AVATAR_PLACEHOLDER; }}
@@ -202,10 +212,10 @@ function Leaderboard() {
                     className="rounded-full object-cover flex-shrink-0 flex-grow-0 border-4 border-yellow-400 bg-green-900"
                     style={{ width: 58, height: 58, minWidth: 58, minHeight: 58, maxWidth: 58, maxHeight: 58, objectFit: 'cover', display: 'block' }}
                   />
-                  <div className="flex items-center justify-center gap-2">
-                    <span style={{ fontSize: '1.2vw' }} className="font-bold text-yellow-200 truncate">{sanitizeInput(topThree[2]?.username || topThree[2]?.wallet?.slice(0, 8) || 'Unknown')}</span>
+                  <div className="flex items-center justify-center gap-6">
+                    <span style={{ fontSize: isMobile ? '1.5vw' : '1vw' }} className="font-bold text-yellow-200">{sanitizeInput(getTop3DisplayName(topThree[2]?.username || topThree[2]?.wallet))}</span>
                     {topThree[2]?.hashrate && (
-                      <span style={{ fontSize: '0.9vw' }} className="text-green-200 font-mono ml-2">{topThree[2].hashrate} GH/s</span>
+                      <span style={{ fontSize: isMobile ? '1.5vw' : '1vw' }} className="text-green-200 font-mono ml-2">{topThree[2].hashrate} GH/s</span>
                     )}
                   </div>
                   <div style={{ minWidth: '8%' }} />
@@ -229,6 +239,7 @@ function Leaderboard() {
                     <th className="py-2 pl-2">Rank</th>
                     <th className="py-2">Player</th>
                     <th className="py-2 text-right pr-2">$BNANA</th>
+                    <th className="py-2 text-right pr-2">XP</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -258,6 +269,7 @@ function Leaderboard() {
                         </div>
                       </td>
                       <td className="py-2 text-right pr-2 font-mono bg-transparent">{player.total_earned?.toFixed(2)} $BNANA</td>
+                      <td className="py-2 text-right pr-2 font-mono bg-transparent">{player.xp?.toFixed(2)} XP</td>
                     </tr>
                   ))}
                   {loading && <tr><td colSpan={3} className="text-center py-4 bg-transparent">Loading…</td></tr>}

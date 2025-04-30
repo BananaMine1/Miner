@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTick, extend } from '@pixi/react';
 import { Texture, Assets, Ticker, Sprite as PixiSprite } from 'pixi.js';
 import * as PIXI from 'pixi.js';
+import { unloadTexture } from '../../lib/assetManager';
 
 interface Props {
   dimensions: { w: number; h: number };
@@ -26,6 +27,8 @@ export default function FogLayer({ dimensions }: Props) {
   
   // Load texture
   useEffect(() => {
+    let fallbackTex: Texture | null = null;
+    let usedFallback = false;
     Assets.load('/assets/fog.png')
       .then((res) => {
         let loadedTexture: Texture | null = null;
@@ -48,15 +51,25 @@ export default function FogLayer({ dimensions }: Props) {
           setTex(loadedTexture);
         } else {
           console.warn('Could not identify fog texture, using fallback.');
+          usedFallback = true;
           createFallbackTexture();
         }
       })
       .catch(() => {
         console.error('Failed to load fog texture, using fallback.');
+        usedFallback = true;
         createFallbackTexture();
       });
-  // Only need to run once
-  }, []); 
+    // Only need to run once
+    return () => {
+      if (tex && !usedFallback) {
+        unloadTexture('/assets/fog.png');
+      }
+      if (tex && usedFallback) {
+        tex.destroy(true);
+      }
+    };
+  }, []);
 
   const createFallbackTexture = () => {
     const cvs = document.createElement('canvas');

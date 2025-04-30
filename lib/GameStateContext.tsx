@@ -4,6 +4,10 @@ import { useWallet } from './WalletContext';
 import { roomLevels } from './gamedata';
 import { getUpgradeCost, getXpToNext, getRepairCost, getUpgradedHash, getUpgradedWatts } from './minerUtils';
 import type { Miner } from './types';
+import { ACHIEVEMENTS, Achievement } from './achievements';
+import AchievementPopup from '../components/AchievementPopup';
+import { META_UPGRADES, MetaUpgrade } from './metaUpgrades';
+import { updateLeaderboardEntry } from '../hooks/useLeaderboard';
 
 // --- Types ---
 export interface PlayerProfile {
@@ -16,6 +20,7 @@ export interface PlayerProfile {
 export interface GameState {
   profile: PlayerProfile | null;
   bnana: number;
+  xp: number;
   unclaimed: number;
   dailyStreak: number;
   canClaimStreak: boolean;
@@ -23,6 +28,9 @@ export interface GameState {
   miners: Miner[];
   loading: boolean;
   error: string | null;
+  achievements: { [id: string]: { unlocked: boolean; unlockedAt?: string } };
+  metaUpgrades: MetaUpgrade[];
+  purchaseMetaUpgrade: (id: string) => void;
 }
 
 export interface GameStateActions {
@@ -50,6 +58,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
   const { address } = useWallet();
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [bnana, setBnana] = useState(0);
+  const [xp, setXp] = useState(0);
   const [unclaimed, setUnclaimed] = useState(0);
   const [dailyStreak, setDailyStreak] = useState(0);
   const [canClaimStreak, setCanClaimStreak] = useState(false);
@@ -57,6 +66,9 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
   const [miners, setMiners] = useState<Miner[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [achievements, setAchievements] = useState<{ [id: string]: { unlocked: boolean; unlockedAt?: string } }>({});
+  const [popupAchievement, setPopupAchievement] = useState<Achievement | null>(null);
+  const [metaUpgrades, setMetaUpgrades] = useState<MetaUpgrade[]>(META_UPGRADES);
 
   // --- Load player state from Supabase ---
   const loadState = useCallback(async () => {
@@ -77,6 +89,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
         bio: data.bio || '',
       });
       setBnana(data.bnana ?? 0);
+      setXp(data.xp ?? 0);
       setUnclaimed(data.unclaimed ?? 0);
       setDailyStreak(data.dailyStreak ?? 0);
       setCanClaimStreak(data.canClaimStreak ?? false);
@@ -99,6 +112,45 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     loadState();
   }, [loadState]);
+
+  // Achievement check logic
+  useEffect(() => {
+    // Only check if player is loaded
+    if (!profile) return;
+    const newAchievements = { ...achievements };
+    let unlockedAny = false;
+    let lastUnlocked: Achievement | null = null;
+    for (const ach of ACHIEVEMENTS) {
+      if (!newAchievements[ach.id]?.unlocked && ach.criteria({ miners, bnana, roomLevel, profile })) {
+        newAchievements[ach.id] = { unlocked: true, unlockedAt: new Date().toISOString() };
+        unlockedAny = true;
+        lastUnlocked = ach;
+        // Grant reward (XP, etc.)
+        if (ach.reward.type === 'xp') {
+          setXp(x => {
+            // Check if XP boost is unlocked
+            const hasXpBoost = metaUpgrades.some(upg => upg.id === 'xp-boost-1' && upg.unlocked);
+            const baseXp = ach.reward.value as number;
+            const xpGain = hasXpBoost ? Math.round(baseXp * 1.05) : baseXp;
+            if (hasXpBoost) console.log(`[XP BOOST] Applied 5% boost: base=${baseXp}, boosted=${xpGain}`);
+            const newXp = x + xpGain;
+            // Persist XP to Supabase and leaderboard
+            if (address) {
+              persistXP(address, newXp, bnana, 0); // Replace 0 with actual hashrate if available
+            }
+            return newXp;
+          });
+        }
+        // TODO: handle other reward types (cosmetic, upgrade)
+      }
+    }
+    if (unlockedAny) {
+      setAchievements(newAchievements);
+      if (lastUnlocked) setPopupAchievement(lastUnlocked);
+      // Persist achievements to Supabase
+      if (address) persistPlayerProgress(address, newAchievements, metaUpgrades);
+    }
+  }, [miners, bnana, roomLevel, profile]);
 
   // --- Actions ---
   const claimRewards = useCallback(async () => {
@@ -281,9 +333,30 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     }
   }, [address, miners, bnana]);
 
+  const purchaseMetaUpgrade = (id: string) => {
+    setMetaUpgrades(prev => prev.map(upg => {
+      if (upg.id === id && !upg.unlocked && xp >= upg.cost) {
+        setXp(x => {
+          const newXp = x - upg.cost;
+          // Persist XP to Supabase and leaderboard
+          if (address) {
+            persistXP(address, newXp, bnana, 0); // Replace 0 with actual hashrate if available
+          }
+          return newXp;
+        });
+        // TODO: Apply effect globally if needed
+        // Persist meta-upgrades to Supabase
+        if (address) persistPlayerProgress(address, achievements, prev.map(u => u.id === id ? { ...u, unlocked: true } : u));
+        return { ...upg, unlocked: true };
+      }
+      return upg;
+    }));
+  };
+
   const value: GameStateContextType = {
     profile,
     bnana,
+    xp,
     unclaimed,
     dailyStreak,
     canClaimStreak,
@@ -299,11 +372,45 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     refresh,
     upgradeMiner,
     repairMiner,
+    achievements,
+    metaUpgrades,
+    purchaseMetaUpgrade,
   };
 
   return (
     <GameStateContext.Provider value={value}>
       {children}
+      {popupAchievement && (
+        <AchievementPopup
+          icon={popupAchievement.icon}
+          title={popupAchievement.title}
+          reward={popupAchievement.reward.type === 'xp' ? `⭐ ${popupAchievement.reward.value} XP` : popupAchievement.reward.type === 'cosmetic' ? `🎨 Cosmetic: ${popupAchievement.reward.value}` : 'Upgrade'}
+          onClose={() => setPopupAchievement(null)}
+        />
+      )}
     </GameStateContext.Provider>
   );
+}
+
+// Helper to persist XP to both players and leaderboard tables
+async function persistXP(address: string, newXp: number, totalEarned: number, hashrate: number) {
+  try {
+    await supabase.from('players').update({ xp: newXp }).eq('wallet', address);
+    // TODO: fetch or compute totalEarned/hashrate if not available in context
+    await updateLeaderboardEntry(address, totalEarned, hashrate, newXp);
+  } catch (err) {
+    console.error('Failed to persist XP to Supabase:', err);
+  }
+}
+
+// Helper to persist achievements/metaUpgrades
+async function persistPlayerProgress(address: string, achievements: any, metaUpgrades: any) {
+  try {
+    await supabase.from('players').update({
+      achievements: JSON.stringify(achievements),
+      meta_upgrades: JSON.stringify(metaUpgrades),
+    }).eq('wallet', address);
+  } catch (err) {
+    console.error('Failed to persist achievements/metaUpgrades:', err);
+  }
 } 
