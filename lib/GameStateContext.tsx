@@ -102,6 +102,8 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
         ? data.miners.filter(m => m.position >= 0 && m.position < maxSlots)
         : [];
       setMiners(filteredMiners);
+      // Load achievements from Supabase
+      setAchievements(data.achievements ? (typeof data.achievements === 'string' ? JSON.parse(data.achievements) : data.achievements) : {});
     } catch (err: any) {
       setError(err.message || 'Failed to load game state');
     } finally {
@@ -198,6 +200,13 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     }
   }, [address, roomLevel, miners]);
 
+  // Helper to compute totalEarned and hashrate from miners
+  function computePlayerStats(miners) {
+    const hashrate = miners.reduce((sum, m) => sum + (m.hash || 0), 0);
+    // For now, totalEarned can be 0 or computed as needed
+    return { hashrate, totalEarned: 0 };
+  }
+
   const buyMiner = useCallback(async (miner: Miner) => {
     if (!address) return;
     setLoading(true);
@@ -205,9 +214,6 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
     try {
       const price = miner.price || 0;
       if (bnana < price) throw new Error('Not enough BNANA');
-      // --- On-chain integration placeholder ---
-      // await contract.buyMiner(miner.id, { from: address });
-      // After on-chain tx, fetch new balance and update state
       const updatedMiners = [...miners, miner];
       setMiners(updatedMiners);
       setBnana(b => b - price);
@@ -215,12 +221,16 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
         .from('players')
         .update({ miners: updatedMiners, bnana: bnana - price })
         .eq('wallet', address);
+      // Update leaderboard
+      const { hashrate, totalEarned } = computePlayerStats(updatedMiners);
+      console.log('Updating leaderboard:', { address, totalEarned, hashrate, xp });
+      await updateLeaderboardEntry(address, totalEarned, xp);
     } catch (err: any) {
       setError(err.message || 'Failed to buy miner');
     } finally {
       setLoading(false);
     }
-  }, [address, miners, bnana]);
+  }, [address, miners, bnana, xp]);
 
   const removeMiner = useCallback(async (instanceId: string) => {
     if (!address) return;
@@ -233,12 +243,16 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
         .from('players')
         .update({ miners: updatedMiners })
         .eq('wallet', address);
+      // Update leaderboard
+      const { hashrate, totalEarned } = computePlayerStats(updatedMiners);
+      console.log('Updating leaderboard:', { address, totalEarned, hashrate, xp });
+      await updateLeaderboardEntry(address, totalEarned, xp);
     } catch (err: any) {
       setError(err.message || 'Failed to remove miner');
     } finally {
       setLoading(false);
     }
-  }, [address, miners]);
+  }, [address, miners, xp]);
 
   const updateProfile = useCallback(async (profileUpdate: Partial<PlayerProfile>) => {
     if (!address) return;
@@ -295,12 +309,16 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
         .from('players')
         .update({ miners: updatedMiners, bnana: bnana - upgradeCost })
         .eq('wallet', address);
+      // Update leaderboard
+      const { hashrate, totalEarned } = computePlayerStats(updatedMiners);
+      console.log('Updating leaderboard:', { address, totalEarned, hashrate, xp });
+      await updateLeaderboardEntry(address, totalEarned, xp);
     } catch (err: any) {
       setError(err.message || 'Failed to upgrade miner');
     } finally {
       setLoading(false);
     }
-  }, [address, miners, bnana]);
+  }, [address, miners, bnana, xp]);
 
   const repairMiner = useCallback(async (instanceId: string) => {
     if (!address) return;
@@ -397,7 +415,7 @@ async function persistXP(address: string, newXp: number, totalEarned: number, ha
   try {
     await supabase.from('players').update({ xp: newXp }).eq('wallet', address);
     // TODO: fetch or compute totalEarned/hashrate if not available in context
-    await updateLeaderboardEntry(address, totalEarned, hashrate, newXp);
+    await updateLeaderboardEntry(address, totalEarned, newXp);
   } catch (err) {
     console.error('Failed to persist XP to Supabase:', err);
   }

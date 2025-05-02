@@ -19,15 +19,22 @@ interface HUDProps {
   maxWatts: number;
   yourHashrate: number;
   earningsPerSecond: number;
+  wattPrice?: number;
+  unclaimed?: number;
+  onClaim?: () => void;
+  loadingUnclaimed?: boolean;
+  hashPowerPercent?: number;
+  totalNetworkHashrate?: number;
+  dailyEarnings?: number;
 }
 
-export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts, maxWatts, yourHashrate, earningsPerSecond }) => {
+export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts, maxWatts, yourHashrate, earningsPerSecond, wattPrice, unclaimed, onClaim, loadingUnclaimed, hashPowerPercent, totalNetworkHashrate, dailyEarnings }) => {
   const { address, connect, disconnect } = useWallet();
   const {
     profile,
     bnana,
     xp,
-    unclaimed,
+    unclaimed: gameStateUnclaimed,
     dailyStreak,
     canClaimStreak,
     loading,
@@ -49,10 +56,10 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
   } = useWattPrice();
 
   // Live unclaimed BNANA counter
-  const [liveUnclaimed, setLiveUnclaimed] = useState(unclaimed);
+  const [liveUnclaimed, setLiveUnclaimed] = useState(gameStateUnclaimed);
   useEffect(() => {
-    setLiveUnclaimed(unclaimed); // reset when unclaimed changes (e.g. after claim)
-  }, [unclaimed]);
+    setLiveUnclaimed(gameStateUnclaimed); // reset when unclaimed changes (e.g. after claim)
+  }, [gameStateUnclaimed]);
   useEffect(() => {
     if (earningsPerSecond > 0) {
       const interval = setInterval(() => {
@@ -185,7 +192,7 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
               yourHashrate={yourHashrate}
               liveUnclaimed={liveUnclaimed}
               canClaimStreak={canClaimStreak}
-              onClaim={handleClaimRewards}
+              onClaim={onClaim ? onClaim : handleClaimRewards}
               onOpenRoomModal={onOpenRoomModal}
               onOpenProfile={() => setShowProfileModal(true)}
               onOpenWallet={() => setShowWalletModal(true)}
@@ -299,10 +306,11 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
             </button>
             {/* Claim Button (restored) */}
             <button
-              onClick={handleClaimRewards}
+              onClick={onClaim ? onClaim : handleClaimRewards}
               className="bg-yellow-400 text-green-900 px-2 sm:px-3 py-1 rounded hover:scale-105 transition flex-shrink-0 text-xs sm:text-sm"
+              disabled={loadingUnclaimed}
             >
-              Claim {liveUnclaimed > 0 ? `+${liveUnclaimed.toFixed(2)}` : ''}
+              {loadingUnclaimed ? 'Loading...' : `Claim${unclaimed && unclaimed > 0 ? ` +${unclaimed.toFixed(2)}` : ''}`}
             </button>
             {/* Music Controls */}
             <button
@@ -322,6 +330,10 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
               className="w-16"
               aria-label="Music Volume"
             />
+            <span className="flex-shrink-0">💻 Your Hashrate: {yourHashrate} GH/s</span>
+            <span className="flex-shrink-0">🌐 Network Hashrate: {totalNetworkHashrate !== undefined ? totalNetworkHashrate.toFixed(2) : '--'} GH/s</span>
+            <span className="flex-shrink-0">📊 Your Share: {hashPowerPercent !== undefined ? (hashPowerPercent * 100).toFixed(3) : '--'}%</span>
+            <span className="flex-shrink-0">💸 Est. Daily Earnings: {dailyEarnings !== undefined ? `${dailyEarnings.toFixed(2)} BNANA` : '--'}</span>
           </div>
         </div>
       </div>

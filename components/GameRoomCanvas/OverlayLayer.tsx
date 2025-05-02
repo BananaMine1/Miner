@@ -39,7 +39,7 @@ const OverlayLayer: React.FC<OverlayLayerProps> = ({
     // Draw grid overlays (lines between corners)
     const gridGfx = new PIXI.Graphics();
     overlayContainer.addChild(gridGfx);
-    gridGfx.lineStyle(2, 0xffffff, 0.5);
+    gridGfx.setStrokeStyle({ width: 2, color: 0xffffff, alpha: 0.5 });
     slots.forEach(slot => {
       const corners = slot.screenCorners;
       if (corners.length === 4) {
@@ -59,9 +59,8 @@ const OverlayLayer: React.FC<OverlayLayerProps> = ({
 
       // Transparent hit-zone using the polygon
       const hitZone = new PIXI.Graphics();
-      hitZone.beginFill(0xffffff, 0.001);
-      hitZone.drawPolygon(points);
-      hitZone.endFill();
+      hitZone.fill({ color: 0xffffff, alpha: 0.001 });
+      hitZone.poly(points);
       hitZone.hitArea = hitPolygon;
       hitZone.eventMode = 'static';
       hitZone.cursor = 'pointer';
@@ -73,24 +72,22 @@ const OverlayLayer: React.FC<OverlayLayerProps> = ({
       // Overlay highlight/selection/hover
       if (highlightSlots.includes(idx)) {
         const highlight = new PIXI.Graphics();
-        highlight.beginFill(0x00ff00, 0.05);
-        highlight.drawCircle(slot.screenPos.x, slot.screenPos.y, 24);
-        highlight.endFill();
+        highlight.fill({ color: 0x00ff00, alpha: 0.05 });
+        highlight.circle(slot.screenPos.x, slot.screenPos.y, 24);
         overlayContainer.addChild(highlight);
       }
       if (selectedSlot && selectedSlot.gridX === slot.gridX && selectedSlot.gridY === slot.gridY) {
         const selected = new PIXI.Graphics();
-        selected.lineStyle(4, 0xffff00, 0.95);
-        selected.drawCircle(slot.screenPos.x, slot.screenPos.y, 32);
-        selected.beginFill(0xffff00, 0.10);
-        selected.drawCircle(slot.screenPos.x, slot.screenPos.y, 24);
-        selected.endFill();
+        selected.setStrokeStyle({ width: 4, color: 0xffff00, alpha: 0.95 });
+        selected.circle(slot.screenPos.x, slot.screenPos.y, 32);
+        selected.fill({ color: 0xffff00, alpha: 0.10 });
+        selected.circle(slot.screenPos.x, slot.screenPos.y, 24);
         overlayContainer.addChild(selected);
       }
       if (hoveredSlot && hoveredSlot.gridX === slot.gridX && hoveredSlot.gridY === slot.gridY) {
         const hovered = new PIXI.Graphics();
-        hovered.lineStyle(3, 0xffff00, 0.8);
-        hovered.drawCircle(slot.screenPos.x, slot.screenPos.y, 28);
+        hovered.setStrokeStyle({ width: 3, color: 0xffff00, alpha: 0.8 });
+        hovered.circle(slot.screenPos.x, slot.screenPos.y, 28);
         overlayContainer.addChild(hovered);
       }
     });

@@ -39,7 +39,9 @@ const PixiBackgroundLayer: React.FC<PixiBackgroundLayerProps> = ({ app, roomLeve
         // Remove old sprite if it exists
         if (sprite && app.stage.children.includes(sprite)) {
           app.stage.removeChild(sprite);
-          sprite.destroy();
+          // v8+ PixiJS: Use PIXI.Assets.unload for managed textures
+          PIXI.Assets.unload(imageUrl);
+          // sprite.destroy();
         }
         const texture = PIXI.Texture.from(imageUrl);
         sprite = new PIXI.Sprite(texture);

@@ -52,7 +52,7 @@ const GridLayer: React.FC<GridLayerProps> = ({ gameLayer, gridConfig }) => {
 
     // Draw grid lines
     const { rows, cols, topLeft, topRight, bottomLeft, bottomRight } = gridConfig;
-    gridGfx.lineStyle(2, 0xffffff, 0.5);
+    gridGfx.setStrokeStyle({ width: 2, color: 0xffffff, alpha: 0.5 });
 
     // Draw vertical lines (columns)
     for (let c = 0; c <= cols; c++) {
@@ -70,25 +70,8 @@ const GridLayer: React.FC<GridLayerProps> = ({ gameLayer, gridConfig }) => {
       gridGfx.moveTo(start.x, start.y);
       gridGfx.lineTo(end.x, end.y);
     }
-
-    // Debug: Draw colored circles at each corner
-    const cornerRadius = 10;
-    // Top Left - Red
-    gridGfx.beginFill(0xff0000);
-    gridGfx.drawCircle(topLeft.x, topLeft.y, cornerRadius);
-    gridGfx.endFill();
-    // Top Right - Green
-    gridGfx.beginFill(0x00ff00);
-    gridGfx.drawCircle(topRight.x, topRight.y, cornerRadius);
-    gridGfx.endFill();
-    // Bottom Left - Blue
-    gridGfx.beginFill(0x0000ff);
-    gridGfx.drawCircle(bottomLeft.x, bottomLeft.y, cornerRadius);
-    gridGfx.endFill();
-    // Bottom Right - Yellow
-    gridGfx.beginFill(0xffff00);
-    gridGfx.drawCircle(bottomRight.x, bottomRight.y, cornerRadius);
-    gridGfx.endFill();
+    // Commit the lines to the graphics object (PixiJS v8+)
+    gridGfx.stroke();
 
     return () => {
       if (gridGfxRef.current) {

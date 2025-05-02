@@ -1,9 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-
-function getRandomWattPrice() {
-  // Simulate a price between 0.4 and 1.2 BNANA/kWh
-  return +(0.4 + Math.random() * 0.8).toFixed(3);
-}
+import { getTodayPowerPrice, PowerEvent } from '../lib/powerPriceOracle';
+import { fetchAllLeaderboardEntries } from './useLeaderboard';
+import { getPowerPriceForDate, setPowerPriceForDate } from '../lib/supabasePowerPrice';
 
 export function useWattPrice() {
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
@@ -11,14 +9,24 @@ export function useWattPrice() {
   const [loading, setLoading] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchPrice = useCallback(() => {
+  const fetchPrice = useCallback(async () => {
     setLoading(true);
-    // Simulate network delay
-    setTimeout(() => {
-      setYesterdayPrice((prev) => prev ?? getRandomWattPrice());
-      setCurrentPrice(getRandomWattPrice());
-      setLoading(false);
-    }, 600);
+    const today = new Date().toISOString().slice(0, 10);
+    // Try to fetch from Supabase first
+    let price = await getPowerPriceForDate(today);
+    if (price === null) {
+      // Fetch all leaderboard entries for network stats
+      const entries = await fetchAllLeaderboardEntries();
+      const totalHashrate = entries.reduce((sum, p) => sum + (p.hashrate || 0), 0);
+      const activePlayers = entries.length;
+      // TODO: Add real event logic
+      const events: PowerEvent[] = ['NORMAL'];
+      price = getTodayPowerPrice({ totalHashrate, activePlayers, events });
+      await setPowerPriceForDate(today, price);
+    }
+    setYesterdayPrice((prev) => prev ?? price); // fallback for first load
+    setCurrentPrice(price);
+    setLoading(false);
   }, []);
 
   useEffect(() => {

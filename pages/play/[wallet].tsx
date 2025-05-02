@@ -14,6 +14,9 @@ import { supabase } from '../../lib/supabaseClient';
 import { v4 as uuidv4 } from 'uuid';
 import { useGameState } from '../../lib/GameStateContext';
 import { roomLevels } from '../../lib/gamedata';
+import { useWattPrice } from '../../hooks/useWattPrice';
+import { useEarnings } from '../../hooks/useEarnings';
+import { fetchAllLeaderboardEntries } from '../../hooks/useLeaderboard';
 
 // Use the new modular GameRoomCanvas
 const DynamicGameRoomCanvas = dynamic(() => import('../../components/GameRoomCanvas/index'), { ssr: false });
@@ -74,6 +77,9 @@ export default function PlayWalletPage({ wallet, gridConfig: initialGridConfig }
   const [showGridConfigModal, setShowGridConfigModal] = useState(false);
   const [showRoomModal, setShowRoomModal] = useState(false);
   const [dragOverSlot, setDragOverSlot] = useState<number | null>(null);
+  const [totalNetworkHashrate, setTotalNetworkHashrate] = useState<number>(0);
+  const [hashPowerPercent, setHashPowerPercent] = useState<number>(0);
+  const [dailyEarnings, setDailyEarnings] = useState<number>(0);
 
   // Close modal if openMiner no longer exists
   useEffect(() => {
@@ -165,8 +171,14 @@ export default function PlayWalletPage({ wallet, gridConfig: initialGridConfig }
   const usedWatts = grid.reduce((sum, tile) => sum + (tile.miner ? tile.miner.watts : 0), 0);
   const maxWatts = roomData?.maxPower || 160;
   const yourHashrate = grid.reduce((sum, tile) => sum + (tile.miner ? tile.miner.hash : 0), 0);
-  // Placeholder: get from backend or context in future
-  const totalNetworkHashrate = 10000; // TODO: Replace with real value
+
+  // --- Watt price (BNANA/kWh) ---
+  const { currentPrice: wattPrice } = useWattPrice();
+
+  // --- Earnings calculation ---
+  const { unclaimed, claim, loading: loadingUnclaimed } = useEarnings(wallet, yourHashrate, usedWatts, wattPrice || 0.7);
+
+  // Use live network hashrate for earnings per second
   const rewardRate = 0.002; // BNANA per GH/s per second (example)
   const yourEarningsPerSecond = totalNetworkHashrate > 0 ? (yourHashrate / totalNetworkHashrate) * rewardRate : 0;
 
@@ -176,6 +188,29 @@ export default function PlayWalletPage({ wallet, gridConfig: initialGridConfig }
       justAddedRef.current = false;
     }
   }, [miners]);
+
+  useEffect(() => {
+    async function fetchNetworkStats() {
+      const entries = await fetchAllLeaderboardEntries();
+      console.log('Fetched leaderboard entries:', entries);
+      const totalHash = entries.reduce((sum, p) => sum + (p.hashrate || 0), 0);
+      console.log('Computed totalNetworkHashrate:', totalHash);
+      setTotalNetworkHashrate(totalHash);
+      if (totalHash > 0) {
+        const percent = yourHashrate / totalHash;
+        setHashPowerPercent(percent);
+        // Daily earnings: share * rewardRate * 86400 seconds
+        const gross = percent * rewardRate * 86400;
+        const kWhUsed = (usedWatts * 86400) / (1000 * 3600);
+        const cost = kWhUsed * (wattPrice || 0.7);
+        setDailyEarnings(Math.max(0, gross - cost));
+      } else {
+        setHashPowerPercent(0);
+        setDailyEarnings(0);
+      }
+    }
+    fetchNetworkStats();
+  }, [yourHashrate, usedWatts, wattPrice]);
 
   // No centering: anchor grid strictly by its four corners
   const gameLayerPosition = { x: 0, y: 0 };
@@ -229,6 +264,13 @@ export default function PlayWalletPage({ wallet, gridConfig: initialGridConfig }
         maxWatts={maxWatts}
         yourHashrate={yourHashrate}
         earningsPerSecond={yourEarningsPerSecond}
+        wattPrice={wattPrice}
+        unclaimed={unclaimed}
+        onClaim={claim}
+        loadingUnclaimed={loadingUnclaimed}
+        hashPowerPercent={hashPowerPercent}
+        totalNetworkHashrate={totalNetworkHashrate}
+        dailyEarnings={dailyEarnings}
         onOpenRoomModal={() => setShowRoomModal(true)}
       />
       {openMiner && <MinerModal miner={openMiner} onClose={() => setOpenMiner(null)} onRemove={() => {
