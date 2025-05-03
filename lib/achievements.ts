@@ -4,7 +4,7 @@ export interface Achievement {
   description: string;
   icon: string;
   criteria: (state: any) => boolean;
-  reward: { type: 'xp' | 'upgrade' | 'cosmetic'; value: number | string };
+  reward: { type: 'xp' | 'upgrade' | 'cosmetic'; value: number | string; icon?: string; label?: string };
 }
 
 export const ACHIEVEMENTS: Achievement[] = [
