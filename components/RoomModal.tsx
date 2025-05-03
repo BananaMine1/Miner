@@ -30,7 +30,7 @@ export default function RoomModal({ currentLevel, onUpgrade, onClose, bnana }: R
   const upgradeDisabledReason = !nextRoom
     ? 'No further upgrades'
     : bnana < nextRoom.upgradeCost
-    ? 'Not enough BNANA'
+    ? 'Not enough CRROT'
     : '';
 
   const handleUpgrade = async () => {
@@ -68,7 +68,7 @@ export default function RoomModal({ currentLevel, onUpgrade, onClose, bnana }: R
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-white text-xl"
+          className="absolute top-3 right-3 text-[#7C4F1D] text-xl"
           aria-label="Close Room Info"
         >
           ✕
@@ -77,7 +77,7 @@ export default function RoomModal({ currentLevel, onUpgrade, onClose, bnana }: R
         {/* Room Comparison */}
         <div className="flex flex-col md:flex-row gap-6 w-[90%] mt-20 mb-6">
           {/* Current Room */}
-          <div className="flex-1 bg-green-800 bg-opacity-80 rounded-lg p-4 flex flex-col items-center">
+          <div className="flex-1 bg-[#FFF7E0] text-[#7C4F1D] border-4 border-yellow-300 rounded-2xl p-4 flex flex-col items-center shadow-xl">
             <div className="font-bold text-yellow-300 mb-1">Current Room</div>
             <div className="text-lg font-bold mb-1">{room.name}</div>
             <div className="text-sm text-green-200 mb-2 text-center">{room.description}</div>
@@ -89,7 +89,7 @@ export default function RoomModal({ currentLevel, onUpgrade, onClose, bnana }: R
           </div>
           {/* Next Room */}
           {nextRoom && (
-            <div className="flex-1 bg-green-900 bg-opacity-80 rounded-lg p-4 flex flex-col items-center border-2 border-yellow-400 shadow-lg">
+            <div className="flex-1 bg-[#FFF7E0] text-[#7C4F1D] border-4 border-yellow-300 rounded-2xl p-4 flex flex-col items-center shadow-xl">
               <div className="font-bold text-yellow-300 mb-1">Next Upgrade</div>
               <div className="text-lg font-bold mb-1 text-yellow-200">{nextRoom.name}</div>
               <div className="text-sm text-green-200 mb-2 text-center">{nextRoom.description}</div>
@@ -97,7 +97,7 @@ export default function RoomModal({ currentLevel, onUpgrade, onClose, bnana }: R
                 <div className="flex justify-between"><span>Power Limit:</span><span>{nextRoom.maxPower}W</span></div>
                 <div className="flex justify-between"><span>Grid Slots:</span><span>{nextRoom.maxSlots}</span></div>
                 <div className="flex justify-between"><span>Grid Size:</span><span>{nextRoom.gridCols} x {nextRoom.gridRows}</span></div>
-                <div className="flex justify-between font-bold text-yellow-300 mt-2"><span>Upgrade Cost:</span><span>{nextRoom.upgradeCost} $BNANA</span></div>
+                <div className="flex justify-between font-bold text-yellow-300 mt-2"><span>Upgrade Cost:</span><span>{nextRoom.upgradeCost} $CRROT</span></div>
               </div>
             </div>
           )}
@@ -106,12 +106,11 @@ export default function RoomModal({ currentLevel, onUpgrade, onClose, bnana }: R
         {loading && <div className="text-center text-yellow-300 font-bold mt-2 animate-pulse">Upgrading room…</div>}
         {error && <div className="text-center text-red-400 font-bold mt-2">{error}</div>}
         {success && <div className="text-center text-green-300 font-bold mt-2 animate-bounce">Upgrade successful!</div>}
-        {/* Upgrade Button & BNANA */}
+        {/* Upgrade Button & CRROT */}
         <div className="flex flex-col items-center gap-3 mt-4">
-          <span className="text-lg font-bold text-yellow-200 flex items-center gap-2">
-            <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-6 h-6 inline-block" />
-            Your BNANA: <span className="text-yellow-300">{bnana.toFixed(2)}</span>
-          </span>
+          <div className="flex items-center gap-2 mt-4">
+            Your CRROT: <span className="text-yellow-300">{bnana.toFixed(2)}</span>
+          </div>
           {nextRoom && (
             <button
               onClick={handleUpgrade}

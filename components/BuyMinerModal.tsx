@@ -39,7 +39,7 @@ export default function BuyMinerModal({ onBuy, onClose, usedWatts, maxWatts }: B
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center">
-      <div className="bg-green-900 text-white p-6 rounded-lg w-full max-w-3xl shadow-2xl relative max-h-[90vh] flex flex-col">
+      <div className="bg-[#FFF7E0] text-[#7C4F1D] p-6 rounded-2xl border-4 border-yellow-300 w-full max-w-3xl shadow-2xl relative max-h-[90vh] flex flex-col">
         <button onClick={onClose} className="absolute top-3 right-4 text-2xl text-yellow-300 hover:scale-110">✖</button>
         <h2 className="text-2xl font-bold mb-6 text-center tracking-wide">Buy Miners</h2>
         <div className="flex-1 overflow-y-auto">
@@ -58,8 +58,9 @@ export default function BuyMinerModal({ onBuy, onClose, usedWatts, maxWatts }: B
                   <div className="flex items-center justify-between mb-1">
                     <h3 className="font-bold text-yellow-300 text-lg">{m.name}</h3>
                     <span className="flex items-center gap-1 text-yellow-200 font-bold text-base">
-                      <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-5 h-5 inline-block" />
-                      {m.price} $BNANA
+                      {/* TODO: Replace with CRROT icon */}
+                      {/* <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-5 h-5 inline-block" /> */}
+                      {m.price} $CRROT
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-xs mb-1">
@@ -100,7 +101,7 @@ export default function BuyMinerModal({ onBuy, onClose, usedWatts, maxWatts }: B
                       className={`flex-1 px-4 py-2 rounded font-bold transition ${disabled ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-yellow-400 text-green-900 hover:scale-105'}`}
                       onClick={() => !disabled && onBuy(m)}
                       disabled={disabled}
-                      title={wouldExceed ? 'Exceeds room wattage limit' : notEnoughBnana ? 'Not enough BNANA' : ''}
+                      title={wouldExceed ? 'Exceeds room wattage limit' : notEnoughBnana ? 'Not enough CRROT' : ''}
                     >
                       Buy
                     </button>
@@ -112,8 +113,9 @@ export default function BuyMinerModal({ onBuy, onClose, usedWatts, maxWatts }: B
         </div>
         <div className="flex items-center justify-between mt-8 px-2">
           <span className="text-lg font-bold text-yellow-200 flex items-center gap-2">
-            <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-6 h-6 inline-block" />
-            Your BNANA: <span className="text-yellow-300">{bnana.toFixed(2)}</span>
+            {/* TODO: Replace with CRROT icon */}
+            {/* <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-6 h-6 inline-block" /> */}
+            Your CRROT: <span className="text-yellow-300">{bnana.toFixed(2)}</span>
           </span>
           <button onClick={onClose} className="px-6 py-2 bg-yellow-400 text-green-900 rounded font-bold text-lg hover:scale-105 transition">Close</button>
         </div>

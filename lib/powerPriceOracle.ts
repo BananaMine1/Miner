@@ -1,5 +1,5 @@
 // powerPriceOracle.ts
-// Utility to calculate daily BNANA/kWh price based on in-game events and usage
+// Utility to calculate daily CRROT/kWh price based on in-game events and usage
 
 // Example event types
 export type PowerEvent = 'HEAT_WAVE' | 'GREEN_ENERGY_DAY' | 'NORMAL';

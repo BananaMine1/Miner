@@ -52,7 +52,7 @@ const PixiBackgroundLayer: React.FC<PixiBackgroundLayerProps> = ({ app, roomLeve
         if (onSpriteReady) onSpriteReady(sprite);
         // Initial sizing
         resizeHandler = () => {
-          if (!sprite || !app || !app.screen) return;
+          if (!sprite || !app || !app.screen || !texture) return;
           const { width, height } = app.screen;
           const scale = Math.max(width / texture.width, height / texture.height);
           sprite.width = texture.width * scale;

@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { supabase } from './supabaseClient';
 import { useWallet } from './WalletContext';
-import { roomLevels } from './gamedata';
+import { roomLevels, miners as allMiners } from './gamedata';
 import { getUpgradeCost, getXpToNext, getRepairCost, getUpgradedHash, getUpgradedWatts } from './minerUtils';
 import type { Miner } from './types';
 import { ACHIEVEMENTS, Achievement } from './achievements';
 import AchievementPopup from '../components/AchievementPopup';
 import { META_UPGRADES, MetaUpgrade } from './metaUpgrades';
 import { updateLeaderboardEntry } from '../hooks/useLeaderboard';
+import { v4 as uuidv4 } from 'uuid';
 
 // --- Types ---
 export interface PlayerProfile {
@@ -80,30 +81,66 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
         .from('players')
         .select('*')
         .eq('wallet', address)
-        .single();
+        .maybeSingle();
       if (fetchError) throw fetchError;
+      let playerData = data;
+      if (!playerData) {
+        // Insert a new player row with default values and 1 Bunny Digger
+        const bunnyDiggerTemplate = allMiners.find(m => m.id === 1);
+        const starterMiner = bunnyDiggerTemplate ? {
+          ...bunnyDiggerTemplate,
+          instanceId: uuidv4(),
+          position: 0,
+          xp: 0,
+          level: 1,
+          durability: 100,
+          overheated: false,
+          boosted: false,
+        } : undefined;
+        const { data: newPlayer, error: insertErr } = await supabase
+          .from('players')
+          .insert([{ 
+            wallet: address,
+            username: 'New Farmer',
+            avatar_url: null,
+            bio: '',
+            bnana: 0,
+            xp: 0,
+            unclaimed: 0,
+            daily_streak: 0,
+            can_claim_streak: false,
+            room_level: 0,
+            miners: starterMiner ? [starterMiner] : [],
+            achievements: {},
+            meta_upgrades: [],
+          }])
+          .select()
+          .maybeSingle();
+        if (insertErr) throw insertErr;
+        playerData = newPlayer;
+      }
       setProfile({
         wallet: address,
-        username: data.username || 'New Miner',
-        avatarUrl: data.avatar_url || null,
-        bio: data.bio || '',
+        username: playerData.username || 'New Farmer',
+        avatarUrl: playerData.avatar_url || null,
+        bio: playerData.bio || '',
       });
-      setBnana(data.bnana ?? 0);
-      setXp(data.xp ?? 0);
-      setUnclaimed(data.unclaimed ?? 0);
-      setDailyStreak(data.dailyStreak ?? 0);
-      setCanClaimStreak(data.canClaimStreak ?? false);
-      setRoomLevel(data.roomLevel ?? 0);
+      setBnana(playerData.bnana ?? 0);
+      setXp(playerData.xp ?? 0);
+      setUnclaimed(playerData.unclaimed ?? 0);
+      setDailyStreak(playerData.daily_streak ?? 0);
+      setCanClaimStreak(playerData.can_claim_streak ?? false);
+      setRoomLevel(playerData.room_level ?? 0);
       // Filter miners to only those within the current grid
-      const roomIdx = data.roomLevel ?? 0;
+      const roomIdx = playerData.room_level ?? 0;
       const room = roomLevels[roomIdx] || roomLevels[0];
       const maxSlots = room.gridRows * room.gridCols;
-      const filteredMiners = Array.isArray(data.miners)
-        ? data.miners.filter(m => m.position >= 0 && m.position < maxSlots)
+      const filteredMiners = Array.isArray(playerData.miners)
+        ? playerData.miners.filter(m => m.position >= 0 && m.position < maxSlots)
         : [];
       setMiners(filteredMiners);
       // Load achievements from Supabase
-      setAchievements(data.achievements ? (typeof data.achievements === 'string' ? JSON.parse(data.achievements) : data.achievements) : {});
+      setAchievements(playerData.achievements ? (typeof playerData.achievements === 'string' ? JSON.parse(playerData.achievements) : playerData.achievements) : {});
     } catch (err: any) {
       setError(err.message || 'Failed to load game state');
     } finally {
@@ -191,7 +228,7 @@ export function GameStateProvider({ children }: { children: ReactNode }) {
       setMiners(migratedMiners);
       await supabase
         .from('players')
-        .update({ roomLevel: nextLevel, miners: migratedMiners })
+        .update({ room_level: nextLevel, miners: migratedMiners })
         .eq('wallet', address);
     } catch (err: any) {
       setError(err.message || 'Failed to upgrade room');

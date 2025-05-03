@@ -11,8 +11,8 @@ export interface MetaUpgrade {
 export const META_UPGRADES: MetaUpgrade[] = [
   {
     id: 'xp-boost-1',
-    title: 'XP Boost I',
-    description: '+5% XP from all sources.',
+    title: 'Carrot Wisdom I',
+    description: '+5% Carrot Points from all sources.',
     cost: 500,
     effect: (state) => ({ ...state, xpMultiplier: (state.xpMultiplier || 1) + 0.05 }),
     icon: '/assets/upgrades/xp-boost.png',
@@ -20,8 +20,8 @@ export const META_UPGRADES: MetaUpgrade[] = [
   },
   {
     id: 'power-saver',
-    title: 'Power Saver',
-    description: 'Reduce miner wattage by 5%.',
+    title: 'Efficient Diggers',
+    description: 'Reduce bunny energy use by 5%.',
     cost: 750,
     effect: (state) => ({ ...state, minerWattageMultiplier: (state.minerWattageMultiplier || 1) - 0.05 }),
     icon: '/assets/upgrades/power-saver.png',

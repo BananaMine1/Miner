@@ -1,6 +1,6 @@
 import type { Miner } from './types';
 
-// Calculate the BNANA cost to upgrade a miner to the next level
+// Calculate the CRROT cost to upgrade a miner to the next level
 export function getUpgradeCost(miner: Miner): number {
   if (!miner.baseUpgradeCost || !miner.level) return 0;
   return miner.baseUpgradeCost * Math.pow(miner.level + 1, 2);
@@ -12,7 +12,7 @@ export function getXpToNext(miner: Miner): number {
   return 100 * Math.pow(miner.level + 1, 2);
 }
 
-// Calculate the BNANA cost to fully repair a miner
+// Calculate the CRROT cost to fully repair a miner
 export function getRepairCost(miner: Miner): number {
   if (!miner.baseRepairRate || miner.durability === undefined) return 0;
   return Math.ceil((100 - miner.durability) * miner.baseRepairRate);

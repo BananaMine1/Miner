@@ -8,9 +8,8 @@ import WalletModal from './WalletModal';
 import WattPriceDisplay from './WattPriceDisplay';
 import { useMediaQuery } from 'react-responsive';
 import MobileHUDMenu from './MobileHUDMenu';
-import LoadingScreen from './LoadingScreen';
-import { playMusic, stopMusic, setMusicVolume, playSFX } from '../lib/audioManager';
 import AchievementModal from './AchievementModal';
+import { playMusic, stopMusic, setMusicVolume, playSFX } from '../lib/audioManager';
 import MetaUpgradeModal from './MetaUpgradeModal';
 
 interface HUDProps {
@@ -138,207 +137,131 @@ export const HUD: React.FC<HUDProps> = ({ onOpenRoomModal = () => {}, usedWatts,
   const [showMetaUpgradeModal, setShowMetaUpgradeModal] = useState(false);
 
   if (loading) {
-    return <LoadingScreen />;
+    return null;
   }
   if (error) {
     return <div className="fixed top-0 left-0 w-full z-50 bg-red-900 bg-opacity-90 flex items-center justify-center text-white text-xl">{error}</div>;
   }
 
-  // Mobile HUD: logo, BNANA, menu button
-  if (isMobile) {
-    return (
-      <>
-        <div className="fixed top-0 left-0 w-full z-20 flex items-center justify-between px-2 py-2 bg-black bg-opacity-70 pointer-events-auto">
-          <img src="/assets/logo.png" alt="Banana Miners Logo" className="h-8 w-auto" />
-          <span className="flex items-center gap-2 text-yellow-200 font-bold text-base">
-            <span role="img" aria-label="BNANA">🍌</span>
-            {bnana.toFixed(2)}
-            <span className="flex items-center gap-1 text-blue-400 ml-2">
-              <span role="img" aria-label="XP">⭐</span> {xp}
-            </span>
-          </span>
-          <div className="flex items-center gap-2 ml-2">
-            <button
-              onClick={() => setShowAchievementModal(true)}
-              className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded text-xl font-bold shadow hover:scale-110 transition"
-              aria-label="Achievements"
-            >
-              🏆
-            </button>
-            <button
-              onClick={() => setShowMetaUpgradeModal(true)}
-              className="bg-blue-400 text-blue-900 px-2 py-1 rounded text-xl font-bold shadow hover:scale-110 transition"
-              aria-label="Meta Upgrades"
-            >
-              🛠️
-            </button>
-            <button
-              className="bg-yellow-400 text-green-900 px-3 py-1 rounded text-xl font-bold shadow hover:scale-105 transition"
-              onClick={() => { setShowMobileMenu(true); playSFX('click'); }}
-              aria-label="Open Menu"
-            >
-              ☰
-            </button>
-          </div>
-          {showMobileMenu && (
-            <MobileHUDMenu
-              onClose={() => setShowMobileMenu(false)}
-              profile={profile}
-              address={address}
-              shortAddress={shortAddress}
-              bnana={bnana}
-              usedWatts={usedWatts}
-              maxWatts={maxWatts}
-              yourHashrate={yourHashrate}
-              liveUnclaimed={liveUnclaimed}
-              canClaimStreak={canClaimStreak}
-              onClaim={onClaim ? onClaim : handleClaimRewards}
-              onOpenRoomModal={onOpenRoomModal}
-              onOpenProfile={() => setShowProfileModal(true)}
-              onOpenWallet={() => setShowWalletModal(true)}
-              onOpenLeaderboard={handleOpenLeaderboard}
-            />
-          )}
-        </div>
-        <AchievementModal open={showAchievementModal} onClose={() => setShowAchievementModal(false)} />
-        <MetaUpgradeModal open={showMetaUpgradeModal} onClose={() => setShowMetaUpgradeModal(false)} />
-      </>
-    );
-  }
-
-  // Desktop HUD (unchanged)
+  // Desktop HUD (consolidated AAA bar)
   return (
     <>
-      <div className="fixed top-0 left-0 w-full z-20 flex flex-col md:flex-row justify-end p-2 md:p-3 gap-2 md:gap-4 pointer-events-none">
-        <ProfileModal
-          open={showProfileModal}
-          onClose={() => setShowProfileModal(false)}
-          wallet={address || ''}
-          initialUsername={profile?.username || null}
-          initialAvatarUrl={profile?.avatarUrl || null}
-          initialBio={profile?.bio || null}
-          refreshProfile={refresh}
-        />
-        <WalletModal
-          open={showWalletModal}
-          onClose={() => setShowWalletModal(false)}
-          wallet={address || ''}
-          onDisconnect={disconnect}
-        />
-        <div className="flex flex-col sm:flex-row justify-between items-center px-2 sm:px-4 py-2 sm:py-3 bg-transparent text-white text-sm font-bold w-full gap-2 sm:gap-4 pointer-events-auto">
-          {/* Left: Logo + user profile */}
-          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto mb-2 sm:mb-0">
-            <img src="/assets/logo.png" alt="Banana Miners Logo" className="h-10 sm:h-14 w-auto" />
-            {/* Avatar (clickable) */}
-            <div
-              className="w-10 sm:w-12 h-10 sm:h-12 rounded-full border-2 border-yellow-400 overflow-hidden cursor-pointer flex-shrink-0"
-              onClick={() => { setShowProfileModal(true); playSFX('click'); }}
-              title="Edit profile"
-              style={{ minWidth: '2.5rem', minHeight: '2.5rem' }}
-            >
-              {profile?.avatarUrl ? (
-                <img
-                  src={profile.avatarUrl}
-                  className="w-full h-full object-cover"
-                  alt="Avatar"
-                />
-              ) : (
-                <div className="w-full h-full bg-gray-200 flex items-center justify-center text-2xl">🐵</div>
-              )}
-            </div>
-            {/* Username (clickable) */}
-            {profile?.username && (
-              <span
-                className="cursor-pointer hover:underline truncate max-w-[80px] sm:max-w-[120px] md:max-w-[200px]"
-                onClick={() => { setShowProfileModal(true); playSFX('click'); }}
-                title="Edit profile"
-              >
-                {sanitizeInput(profile.username)}
-              </span>
+      <div className="fixed top-0 left-0 w-full z-30 flex flex-col md:flex-row justify-between items-center px-2 py-2 bg-[#FFF7E0] bg-opacity-95 shadow-lg rounded-b-2xl gap-2 pointer-events-auto border-b-4 border-yellow-300">
+        {/* Left: Profile/Avatar and Username */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div
+            className="w-10 h-10 rounded-full border-2 border-yellow-400 overflow-hidden cursor-pointer flex-shrink-0"
+            onClick={() => { setShowProfileModal(true); playSFX('click'); }}
+            title="Edit profile"
+          >
+            {profile?.avatarUrl ? (
+              <img src={profile.avatarUrl} className="w-full h-full object-cover" alt="Avatar" />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center text-2xl">🐰</div>
             )}
-            {/* Wallet button */}
-            <button
-              onClick={() => { handleWalletButtonClick(); playSFX('click'); }}
-              className="ml-1 sm:ml-2 bg-yellow-400 text-green-900 px-2 py-1 rounded hover:scale-105 transition flex-shrink-0 text-xs sm:text-sm"
-            >
-              {address ? shortAddress : 'Connect Wallet'}
-            </button>
           </div>
-          {/* Right: stats & actions */}
-          <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 w-full sm:w-auto">
-            <span className="flex-shrink-0">🔌 {usedWatts}/{maxWatts}W</span>
-            <span className="flex-shrink-0">💰 {bnana.toFixed(2)} $BNANA</span>
-            <span className="flex-shrink-0 flex items-center gap-1 text-blue-300">
-              <span role="img" aria-label="XP">⭐</span> {xp}
-            </span>
-            <button
-              onClick={() => setShowAchievementModal(true)}
-              className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded text-xl font-bold shadow hover:scale-110 transition"
-              aria-label="Achievements"
-            >
-              🏆
-            </button>
-            <button
-              onClick={() => setShowMetaUpgradeModal(true)}
-              className="bg-blue-400 text-blue-900 px-2 py-1 rounded text-xl font-bold shadow hover:scale-110 transition"
-              aria-label="Meta Upgrades"
-            >
-              🛠️
-            </button>
-            <WattPriceDisplay
-              currentPrice={currentPrice}
-              delta={delta}
-              loading={wattLoading}
-              onRefresh={() => { refreshWattPrice(); playSFX('click'); }}
-            />
-            {/* Leaderboard Button */}
-            <button
-              onClick={() => { handleOpenLeaderboard(); playSFX('click'); }}
-              className="bg-yellow-400 text-green-900 px-2 sm:px-3 py-1 rounded hover:scale-105 transition flex-shrink-0 text-xs sm:text-sm"
-            >
-              🏆 Leaderboard
-            </button>
-            <button
-              onClick={() => { onOpenRoomModal(); playSFX('click'); }}
-              className="bg-yellow-400 text-green-900 px-2 sm:px-3 py-1 rounded hover:scale-105 transition flex-shrink-0 text-xs sm:text-sm"
-            >
-              🏠 Room
-            </button>
-            {/* Claim Button (restored) */}
-            <button
-              onClick={onClaim ? onClaim : handleClaimRewards}
-              className="bg-yellow-400 text-green-900 px-2 sm:px-3 py-1 rounded hover:scale-105 transition flex-shrink-0 text-xs sm:text-sm"
-              disabled={loadingUnclaimed}
-            >
-              {loadingUnclaimed ? 'Loading...' : `Claim${unclaimed && unclaimed > 0 ? ` +${unclaimed.toFixed(2)}` : ''}`}
-            </button>
-            {/* Music Controls */}
-            <button
-              onClick={handleMusicToggle}
-              className="bg-yellow-400 text-green-900 px-2 py-1 rounded text-xs font-bold shadow hover:scale-105 transition"
-              aria-label={musicOn ? 'Pause Music' : 'Play Music'}
-            >
-              {musicOn ? '⏸️' : '▶️'}
-            </button>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={musicVolume}
-              onChange={handleMusicVolume}
-              className="w-16"
-              aria-label="Music Volume"
-            />
-            <span className="flex-shrink-0">💻 Your Hashrate: {yourHashrate} GH/s</span>
-            <span className="flex-shrink-0">🌐 Network Hashrate: {totalNetworkHashrate !== undefined ? totalNetworkHashrate.toFixed(2) : '--'} GH/s</span>
-            <span className="flex-shrink-0">📊 Your Share: {hashPowerPercent !== undefined ? (hashPowerPercent * 100).toFixed(3) : '--'}%</span>
-            <span className="flex-shrink-0">💸 Est. Daily Earnings: {dailyEarnings !== undefined ? `${dailyEarnings.toFixed(2)} BNANA` : '--'}</span>
-          </div>
+          <span
+            className="font-bold text-[#7C4F1D] truncate max-w-[120px] cursor-pointer hover:underline"
+            onClick={() => { setShowProfileModal(true); playSFX('click'); }}
+            title="Edit profile"
+          >
+            {sanitizeInput(profile?.username || 'New Farmer')}
+          </span>
+        </div>
+        {/* Center: Stats */}
+        <div className="flex flex-wrap justify-center items-center gap-3 text-base font-bold">
+          <span className="flex items-center gap-1 text-[#7C4F1D]" title="CRROT Balance">🥕 {bnana.toFixed(2)}</span>
+          <span className="flex items-center gap-1 text-green-200" title="Total Bunny Power">⚡ {yourHashrate}</span>
+          <span className="flex items-center gap-1 text-blue-300" title="Carrot Points (XP)">⭐ {xp}</span>
+          <button
+            onClick={onClaim ? onClaim : handleClaimRewards}
+            className={`px-3 py-1 rounded font-bold transition ${unclaimed > 0 ? 'bg-yellow-400 text-green-900 hover:scale-105' : 'bg-gray-700 text-gray-400'} ml-2`}
+            disabled={loadingUnclaimed || unclaimed <= 0}
+            title={loadingUnclaimed ? 'Loading...' : unclaimed > 0 ? `Claim ${unclaimed.toFixed(2)} 🥕` : 'No unclaimed CRROT'}
+          >
+            Claim 🥕 {unclaimed > 0 ? unclaimed.toFixed(2) : ''}
+          </button>
+        </div>
+        {/* Right: Actions */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAchievementModal(true)}
+            className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded text-xl font-bold shadow hover:scale-110 transition"
+            aria-label="Achievements"
+            title="Achievements"
+          >
+            🏆
+          </button>
+          <button
+            onClick={() => setShowMetaUpgradeModal(true)}
+            className="bg-blue-400 text-blue-900 px-2 py-1 rounded text-xl font-bold shadow hover:scale-110 transition"
+            aria-label="Upgrades"
+            title="Upgrades"
+          >
+            🛠️
+          </button>
+          <button
+            onClick={handleOpenLeaderboard}
+            className="bg-yellow-400 text-green-900 px-2 py-1 rounded text-xl font-bold shadow hover:scale-110 transition"
+            aria-label="Leaderboard"
+            title="Leaderboard"
+          >
+            🏅
+          </button>
+          <button
+            onClick={() => { onOpenRoomModal(); playSFX('click'); }}
+            className="bg-yellow-400 text-green-900 px-2 py-1 rounded text-xl font-bold shadow hover:scale-110 transition"
+            aria-label="Room"
+            title="Room"
+          >
+            🏠
+          </button>
+          <button
+            onClick={() => setShowMobileMenu(true)}
+            className="bg-yellow-400 text-green-900 px-2 py-1 rounded text-xl font-bold shadow hover:scale-110 transition"
+            aria-label="Menu"
+            title="Menu"
+          >
+            ☰
+          </button>
         </div>
       </div>
+      <ProfileModal
+        open={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        wallet={address || ''}
+        initialUsername={profile?.username || null}
+        initialAvatarUrl={profile?.avatarUrl || null}
+        initialBio={profile?.bio || null}
+        refreshProfile={refresh}
+      />
+      <WalletModal
+        open={showWalletModal}
+        onClose={() => setShowWalletModal(false)}
+        wallet={address || ''}
+        onDisconnect={disconnect}
+      />
       <AchievementModal open={showAchievementModal} onClose={() => setShowAchievementModal(false)} />
       <MetaUpgradeModal open={showMetaUpgradeModal} onClose={() => setShowMetaUpgradeModal(false)} />
+      {showMobileMenu && (
+        <MobileHUDMenu
+          onClose={() => setShowMobileMenu(false)}
+          profile={profile}
+          address={address}
+          shortAddress={shortAddress}
+          bnana={bnana}
+          usedWatts={usedWatts}
+          maxWatts={maxWatts}
+          yourHashrate={yourHashrate}
+          liveUnclaimed={unclaimed}
+          canClaimStreak={canClaimStreak}
+          onClaim={onClaim ? onClaim : handleClaimRewards}
+          onOpenRoomModal={onOpenRoomModal}
+          onOpenProfile={() => setShowProfileModal(true)}
+          onOpenWallet={() => setShowWalletModal(true)}
+          onOpenLeaderboard={handleOpenLeaderboard}
+        />
+      )}
     </>
   );
 };

@@ -31,7 +31,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ open, onClose, wallet, onDisc
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-      <div className="bg-white text-jungleGreen rounded-lg shadow-lg p-6 w-full max-w-sm relative">
+      <div className="bg-[#FFF7E0] text-[#7C4F1D] rounded-2xl border-4 border-yellow-300 shadow-lg p-6 w-full max-w-sm relative">
         <button
           className="absolute top-2 right-2 text-xl text-gray-400 hover:text-gray-700"
           onClick={onClose}

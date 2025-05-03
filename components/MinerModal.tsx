@@ -31,7 +31,7 @@ const MinerModal: React.FC<MinerModalProps> = ({ miner, onClose, onRemove, onUpg
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-      <div className="bg-green-900 p-6 rounded-lg text-white max-w-sm w-full">
+      <div className="bg-[#FFF7E0] p-6 rounded-2xl border-4 border-yellow-300 text-[#7C4F1D] max-w-sm w-full shadow-xl">
         <h2 className="text-xl font-bold mb-2">{miner.name}</h2>
         <p>Level: {miner.level} / {miner.maxLevel}</p>
         <p>XP: {miner.xp} / {xpToNext}</p>
@@ -51,7 +51,7 @@ const MinerModal: React.FC<MinerModalProps> = ({ miner, onClose, onRemove, onUpg
             disabled={!canUpgrade || atMaxLevel}
             title={atMaxLevel ? 'Max level reached' : upgradeDisabledReason}
           >
-            Upgrade (Cost: {upgradeCost} BNANA, {xpToNext} XP)
+            Upgrade (Cost: {upgradeCost} CRROT, {xpToNext} XP)
           </button>
           <button
             onClick={onRepair}
@@ -59,7 +59,7 @@ const MinerModal: React.FC<MinerModalProps> = ({ miner, onClose, onRemove, onUpg
             disabled={!canRepair || atFullDurability}
             title={atFullDurability ? 'Already at full durability' : repairDisabledReason}
           >
-            Repair (Cost: {repairCost} BNANA)
+            Repair (Cost: {repairCost} CRROT)
           </button>
           <div className="flex gap-2 mt-2">
             <button onClick={onClose} className="flex-1 px-4 py-2 bg-yellow-400 text-green-900 rounded font-bold">Close</button>

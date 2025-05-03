@@ -2,7 +2,7 @@
 
 export const roomLevels = [
     {
-      name: "Starter Shack",
+      name: "Starter Farm",
       level: 0,
       background: "/assets/rooms/shack.jpg",
       gridCols: 2,
@@ -17,10 +17,10 @@ export const roomLevels = [
         bottomRight: { x: 975, y: 690},
         
       },
-      description: 'A humble shack to start your mining journey.'
+      description: 'A humble farm to start your burrow journey.'
     },
     {
-      name: "Swamp Shed",
+      name: "Level 1 Farm",
       level: 1,
       background: "/assets/rooms/swamp_shed.jpg",
       gridCols: 2,
@@ -34,10 +34,10 @@ export const roomLevels = [
         bottomLeft: { x: 180, y: 420 },
         bottomRight: { x: 600, y: 420 },
       },
-      description: 'A shed in the swamp, more space for miners.'
+      description: 'An upgraded farm with more space for bunnies'
     },
     {
-      name: "Jungle Garage",
+      name: "Level 2 Farm",
       level: 2,
       background: "/assets/rooms/jungle_garage.jpg",
       gridCols: 6,
@@ -51,14 +51,14 @@ export const roomLevels = [
         bottomLeft: { x: 160, y: 440 },
         bottomRight: { x: 700, y: 440 },
       },
-      description: 'A garage in the jungle, for serious mining.'
+      description: 'An upgraded farm with more space for bunnies'
     }
   ];
   
   export const miners = [
     {
       id: 1,
-      name: "Banana Jr",
+      name: "Bunny Digger",
       price: 10,
       hash: 200,
       watts: 8,
@@ -68,11 +68,11 @@ export const roomLevels = [
       baseUpgradeCost: 1,
       baseRepairRate: 0.1,
       durability: 100,
-      image: "/assets/miner/miner-1.png"
+      image: "/assets/bunnies/bunny-digging.png"
     },
     {
       id: 2,
-      name: "Peel Pro",
+      name: "Bunny Planter",
       price: 30,
       hash: 600,
       watts: 18,
@@ -82,11 +82,11 @@ export const roomLevels = [
       baseUpgradeCost: 3,
       baseRepairRate: 0.2,
       durability: 100,
-      image: "/assets/miner/miner-2.png"
+      image: "/assets/bunnies/bunny-planting.png"
     },
     {
       id: 3,
-      name: "Jungle Scout",
+      name: "Bunny Harvester",
       price: 100,
       hash: 2000,
       watts: 50,
@@ -96,7 +96,7 @@ export const roomLevels = [
       baseUpgradeCost: 10,
       baseRepairRate: 0.5,
       durability: 100,
-      image: "/assets/miner/miner-3.png"
+      image: "/assets/bunnies/bunny-harvesting.png"
     },
     {
       id: 4,
@@ -114,7 +114,7 @@ export const roomLevels = [
     },
     {
       id: 5,
-      name: "Ape Ace",
+      name: "Bunny Ace",
       price: 1200,
       hash: 25000,
       watts: 400,
@@ -128,7 +128,7 @@ export const roomLevels = [
     },
     {
       id: 6,
-      name: "Gold Gibbon",
+      name: "Gold Packer",
       price: 3000,
       hash: 80000,
       watts: 900,
@@ -142,7 +142,7 @@ export const roomLevels = [
     },
     {
       id: 7,
-      name: "Mystic Macaque",
+      name: "Mystic Planter",
       price: 5000,
       hash: 200000,
       watts: 1800,
@@ -156,7 +156,7 @@ export const roomLevels = [
     },
     {
       id: 8,
-      name: "Solar Sage",
+      name: "Solar Planter",
       price: 8000,
       hash: 400000,
       watts: 2800,
@@ -170,7 +170,7 @@ export const roomLevels = [
     },
     {
       id: 9,
-      name: "Cosmic Kong",
+      name: "Cosmic Packer",
       price: 10000,
       hash: 800000,
       watts: 4000,

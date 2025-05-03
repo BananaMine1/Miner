@@ -18,7 +18,7 @@ export function useGameController() {
     return { txHash: '0xtesthash', status: 'success' };
   };
 
-  // Claim BNANA rewards
+  // Claim CRROT rewards
   const claim = async () => {
     return simulateTx(setClaimStatus);
   };

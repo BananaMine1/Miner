@@ -10,14 +10,14 @@ interface WattPriceDisplayProps {
 const WattPriceDisplay: React.FC<WattPriceDisplayProps> = ({ currentPrice, delta, loading, onRefresh }) => (
   <span
     className="flex items-center gap-1 flex-shrink-0"
-    title="Current watt price (BNANA per kWh). Updates daily via oracle."
+    title="Current watt price (CRROT per kWh). Updates daily via oracle."
   >
     🔋
     {loading ? (
       <span className="inline-block animate-spin h-4 w-4 border-t-2 border-yellow-400 border-solid rounded-full"></span>
     ) : currentPrice !== null ? (
       <>
-        {currentPrice} <span className="text-yellow-300">BNANA/kWh</span>
+        {currentPrice} <span className="text-yellow-300">CRROT/kWh</span>
         {delta !== null && delta !== 0 && (
           <span
             className={

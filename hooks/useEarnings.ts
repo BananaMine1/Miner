@@ -3,28 +3,49 @@ import { supabase } from '../lib/supabaseClient';
 import { fetchAllLeaderboardEntries } from './useLeaderboard';
 
 /**
- * Calculates passive $BNANA earnings based on hashrate.
+ * Calculates passive $CRROT earnings based on hashrate.
  * @param wallet Player wallet address
  * @param hashRate Total active hashrate in GH/s
  * @param watts Total power consumption in Watts
- * @param wattPrice Current BNANA/kWh rate
+ * @param wattPrice Current CRROT/kWh rate
  */
 export function useEarnings(wallet: string, hashRate: number, watts: number, wattPrice: number) {
+  // All hooks must be at the top, before any logic or returns
   const [unclaimed, setUnclaimed] = useState(0);
   const [loading, setLoading] = useState(true);
-  const lastPersistRef = useRef(Date.now());
   const [lastEarnTimestamp, setLastEarnTimestamp] = useState(Date.now());
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastWalletRef = useRef<string | null>(null);
 
-  // Load unclaimed and last_earn_timestamp from Supabase on mount
+  // Reset state and clear interval on wallet change
   useEffect(() => {
-    if (!wallet) return;
+    if (lastWalletRef.current !== wallet) {
+      setUnclaimed(0);
+      setLoading(true);
+      setLastEarnTimestamp(Date.now());
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      lastWalletRef.current = wallet;
+    }
+  }, [wallet]);
+
+  // Load unclaimed and last_earn_timestamp from Supabase on mount or wallet change
+  useEffect(() => {
+    let cancelled = false;
+    if (!wallet) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     supabase
       .from('players')
       .select('unclaimed, last_earn_timestamp')
       .eq('wallet', wallet)
-      .single()
+      .maybeSingle()
       .then(async ({ data }) => {
+        if (cancelled) return;
         let baseUnclaimed = 0;
         let lastEarn = Date.now();
         if (data) {
@@ -35,11 +56,9 @@ export function useEarnings(wallet: string, hashRate: number, watts: number, wat
         const now = Date.now();
         const elapsedSeconds = Math.floor((now - lastEarn) / 1000);
         if (elapsedSeconds > 0 && hashRate > 0) {
-          // Fetch current total network hashrate
           const entries = await fetchAllLeaderboardEntries();
           const totalNetworkHashrate = entries.reduce((sum, p) => sum + (p.hashrate || 0), 0);
-          // Use current watt price for simplicity (can be improved for day-by-day)
-          const rewardRate = 0.002; // BNANA per GH/s per second
+          const rewardRate = 0.002; // CRROT per GH/s per second
           let offlineEarnings = 0;
           if (totalNetworkHashrate > 0) {
             const playerShare = hashRate / totalNetworkHashrate;
@@ -55,43 +74,51 @@ export function useEarnings(wallet: string, hashRate: number, watts: number, wat
         setLoading(false);
         // Persist updated unclaimed and last_earn_timestamp
         supabase.from('players').update({ unclaimed: baseUnclaimed, last_earn_timestamp: new Date(now).toISOString() }).eq('wallet', wallet)
-          .then(({ error }) => { if (error) console.error('Failed to persist unclaimed BNANA (load):', error); });
+          .then(({ error }) => { if (error) console.error('Failed to persist unclaimed CRROT (load):', error); });
+        // Start earning timer only after initial load
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        intervalRef.current = setInterval(() => {
+          if (!wallet) return;
+          fetchAllLeaderboardEntries().then(entries => {
+            const totalNetworkHashrate = entries.reduce((sum, p) => sum + (p.hashrate || 0), 0);
+            setUnclaimed(prev => {
+              if (totalNetworkHashrate > 0 && hashRate > 0) {
+                const rewardRate = 0.002;
+                const seconds = 1;
+                const playerShare = hashRate / totalNetworkHashrate;
+                const gross = playerShare * rewardRate * seconds;
+                const kWhUsed = (watts * seconds) / (1000 * 3600);
+                const cost = kWhUsed * wattPrice;
+                const netGain = Math.max(0, gross - cost);
+                const next = prev + netGain;
+                supabase.from('players').update({ unclaimed: next }).eq('wallet', wallet)
+                  .then(({ error }) => { if (error) console.error('Failed to persist unclaimed CRROT (tick):', error); });
+                return next;
+              }
+              return prev;
+            });
+          });
+        }, 1000);
       });
+    return () => {
+      cancelled = true;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, [wallet, hashRate, watts, wattPrice]);
-
-  // Simulate $BNANA rewards accumulation every second (while online)
-  useEffect(() => {
-    if (!wallet || loading || hashRate <= 0) return;
-    const interval = setInterval(() => {
-      const rewardRate = 0.002;
-      const seconds = 1;
-      fetchAllLeaderboardEntries().then(entries => {
-        const totalNetworkHashrate = entries.reduce((sum, p) => sum + (p.hashrate || 0), 0);
-        setUnclaimed(prev => {
-          if (totalNetworkHashrate > 0) {
-            const playerShare = hashRate / totalNetworkHashrate;
-            const gross = playerShare * rewardRate * seconds;
-            const kWhUsed = (watts * seconds) / (1000 * 3600);
-            const cost = kWhUsed * wattPrice;
-            const netGain = Math.max(0, gross - cost);
-            const next = prev + netGain;
-            supabase.from('players').update({ unclaimed: next }).eq('wallet', wallet)
-              .then(({ error }) => { if (error) console.error('Failed to persist unclaimed BNANA (tick):', error); });
-            return next;
-          }
-          return prev;
-        });
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [wallet, hashRate, watts, wattPrice, loading]);
 
   // Persist on unmount
   useEffect(() => {
     return () => {
       if (wallet) {
         supabase.from('players').update({ unclaimed }).eq('wallet', wallet)
-          .then(({ error }) => { if (error) console.error('Failed to persist unclaimed BNANA (unmount):', error); });
+          .then(({ error }) => { if (error) console.error('Failed to persist unclaimed CRROT (unmount):', error); });
+      }
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,7 +130,7 @@ export function useEarnings(wallet: string, hashRate: number, watts: number, wat
     const now = Date.now();
     if (wallet) {
       supabase.from('players').update({ unclaimed: 0, last_earn_timestamp: new Date(now).toISOString() }).eq('wallet', wallet)
-        .then(({ error }) => { if (error) console.error('Failed to reset unclaimed BNANA (claim):', error); });
+        .then(({ error }) => { if (error) console.error('Failed to reset unclaimed CRROT (claim):', error); });
     }
     setLastEarnTimestamp(now);
     return claimed;

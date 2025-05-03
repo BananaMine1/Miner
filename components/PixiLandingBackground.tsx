@@ -33,8 +33,8 @@ export default function PixiLandingBackground({ isNight }: Props) {
   // Restore conditional texture loading
   useEffect(() => {
     const url = isNight 
-      ? '/assets/jungle-background-night.png' 
-      : '/assets/jungle-background.png';
+      ? '/assets/background-night.png'
+      : '/assets/background.png';
       
     setLoading(true);
     setError(null);

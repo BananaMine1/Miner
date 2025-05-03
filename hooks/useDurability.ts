@@ -16,7 +16,7 @@ export function useDurability(
           const newDurability = Math.max((m.durability ?? 100) - 5, 0);
 
           if (newDurability === 0) {
-            // Auto-recycle: give 5 $BNANA back
+            // Auto-recycle: give 5 $CRROT back
             setBnana(prev => prev + 5);
             return { ...m, durability: 0 };
           }

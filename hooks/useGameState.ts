@@ -22,7 +22,7 @@ interface LeaderboardData {
 interface GameState {
   player: PlayerData | null;
   leaderboard: LeaderboardData | null;
-  bnanaBalance: number;
+  crrotBalance: number;
   pendingRewards: number;
   roomLevel: number;
   loading: boolean;
@@ -51,7 +51,7 @@ const DEFAULT_LEADERBOARD = (wallet: string): LeaderboardData => ({
 export function useGameState(wallet: string | undefined): GameState {
   const [player, setPlayer] = useState<PlayerData | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardData | null>(null);
-  const [bnanaBalance, setBnanaBalance] = useState(0);
+  const [crrotBalance, setCrrotBalance] = useState(0);
   const [pendingRewards, setPendingRewards] = useState(0);
   const [roomLevel, setRoomLevel] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -101,7 +101,7 @@ export function useGameState(wallet: string | undefined): GameState {
       }
       setLeaderboard(lbData);
 
-      // Simulate BNANA balance and pending rewards
+      // Simulate CRROT balance and pending rewards
       const balance = lbData ? Math.floor(lbData.total_earned) : 0;
       // Time-based pending rewards calculation
       let pending = 0;
@@ -111,20 +111,20 @@ export function useGameState(wallet: string | undefined): GameState {
         const now = new Date();
         if (lastClaimed) {
           const secondsElapsed = Math.floor((now.getTime() - lastClaimed.getTime()) / 1000);
-          // Example: 0.01 BNANA per hashrate per minute
+          // Example: 0.01 CRROT per hashrate per minute
           pending = hashrate * 0.01 * (secondsElapsed / 60);
         } else {
           // If never claimed, start accumulating from account creation
           pending = 0;
         }
       }
-      setBnanaBalance(balance);
+      setCrrotBalance(balance);
       setPendingRewards(pending);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch game state');
       setPlayer(null);
       setLeaderboard(null);
-      setBnanaBalance(0);
+      setCrrotBalance(0);
       setPendingRewards(0);
       setRoomLevel(0);
     } finally {
@@ -142,9 +142,9 @@ export function useGameState(wallet: string | undefined): GameState {
     // Check if next level exists
     if (!roomLevels[nextLevel]) return false;
     
-    // Check if player has enough BNANA
+    // Check if player has enough CRROT
     const upgradeCost = roomLevels[nextLevel].upgradeCost;
-    if (bnanaBalance < upgradeCost) return false;
+    if (crrotBalance < upgradeCost) return false;
     
     try {
       // Update player's room level
@@ -157,9 +157,9 @@ export function useGameState(wallet: string | undefined): GameState {
       
       if (updateErr) throw new Error(`Failed to upgrade room: ${updateErr.message}`);
       
-      // Deduct BNANA (in a real app, this would likely be handled by a smart contract)
-      const newBalance = bnanaBalance - upgradeCost;
-      setBnanaBalance(newBalance);
+      // Deduct CRROT (in a real app, this would likely be handled by a smart contract)
+      const newBalance = crrotBalance - upgradeCost;
+      setCrrotBalance(newBalance);
       
       // Update local state
       setRoomLevel(nextLevel);
@@ -179,7 +179,7 @@ export function useGameState(wallet: string | undefined): GameState {
   return {
     player,
     leaderboard,
-    bnanaBalance,
+    crrotBalance,
     pendingRewards,
     roomLevel,
     loading,

@@ -1,9 +1,9 @@
 import React from 'react';
 
 const data = [
-    { name: '0xApe...1234', bnana: 5032 },
-    { name: '0xMonk...88C1', bnana: 4380 },
-    { name: '0xChimp...D09E', bnana: 3950 },
+    { name: '0xApe...1234', crrot: 5032 },
+    { name: '0xMonk...88C1', crrot: 4380 },
+    { name: '0xChimp...D09E', crrot: 3950 },
   ];
   
   export default function Leaderboard() {
@@ -14,14 +14,14 @@ const data = [
           <thead>
             <tr className="bg-yellow-300">
               <th className="p-2 text-left">Player</th>
-              <th className="p-2 text-right">$BNANA Earned</th>
+              <th className="p-2 text-right">$CRROT Earned</th>
             </tr>
           </thead>
           <tbody>
             {data.map((entry, idx) => (
               <tr key={idx} className="border-t border-yellow-200">
                 <td className="p-2">{entry.name}</td>
-                <td className="p-2 text-right">{entry.bnana}</td>
+                <td className="p-2 text-right">{entry.crrot}</td>
               </tr>
             ))}
           </tbody>

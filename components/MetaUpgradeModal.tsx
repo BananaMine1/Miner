@@ -8,7 +8,7 @@ const MetaUpgradeModal: React.FC<{ open: boolean; onClose: () => void }> = ({ op
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
-      <div className="bg-white rounded-lg shadow-2xl p-6 max-w-lg w-full relative animate-fade-in">
+      <div className="bg-[#FFF7E0] text-[#7C4F1D] rounded-2xl border-4 border-yellow-300 shadow-2xl p-6 max-w-lg w-full relative animate-fade-in">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-yellow-500 text-2xl font-bold hover:scale-110 transition"

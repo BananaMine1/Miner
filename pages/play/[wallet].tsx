@@ -17,6 +17,7 @@ import { roomLevels } from '../../lib/gamedata';
 import { useWattPrice } from '../../hooks/useWattPrice';
 import { useEarnings } from '../../hooks/useEarnings';
 import { fetchAllLeaderboardEntries } from '../../hooks/useLeaderboard';
+import { useWallet } from '../../lib/WalletContext';
 
 // Use the new modular GameRoomCanvas
 const DynamicGameRoomCanvas = dynamic(() => import('../../components/GameRoomCanvas/index'), { ssr: false });
@@ -26,7 +27,7 @@ export async function getServerSideProps(context) {
   
   // Initial grid config - will be overridden by room level
   const gridConfig = {
-    cellSize: 96,
+    cellSize: 80,
     rows: 2,
     cols: 4,
     topLeft: { x: 412, y: 600 },
@@ -42,6 +43,21 @@ export async function getServerSideProps(context) {
 // (moved to lib/gridUtils)
 
 export default function PlayWalletPage({ wallet, gridConfig: initialGridConfig }) {
+  const { address, connect } = useWallet();
+  // If not connected, show wallet connect prompt
+  if (!address) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#FFF7E0]">
+        <h2 className="text-2xl font-bold mb-4 text-[#7C4F1D]">Connect your wallet to play</h2>
+        <button
+          className="bg-green-600 text-white px-6 py-3 rounded-lg text-lg font-bold shadow hover:bg-green-700 transition"
+          onClick={connect}
+        >
+          Connect Wallet
+        </button>
+      </div>
+    );
+  }
   // Game state from context
   const {
     miners,
@@ -176,7 +192,7 @@ export default function PlayWalletPage({ wallet, gridConfig: initialGridConfig }
   const { currentPrice: wattPrice } = useWattPrice();
 
   // --- Earnings calculation ---
-  const { unclaimed, claim, loading: loadingUnclaimed } = useEarnings(wallet, yourHashrate, usedWatts, wattPrice || 0.7);
+  const { unclaimed, claim, loading: loadingUnclaimed } = useEarnings(address, yourHashrate, usedWatts, wattPrice || 0.7);
 
   // Use live network hashrate for earnings per second
   const rewardRate = 0.002; // BNANA per GH/s per second (example)
@@ -215,6 +231,16 @@ export default function PlayWalletPage({ wallet, gridConfig: initialGridConfig }
   // No centering: anchor grid strictly by its four corners
   const gameLayerPosition = { x: 0, y: 0 };
 
+  // Determine background image for starter room
+  let backgroundImage = undefined;
+  if (roomLevel === 0) {
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      backgroundImage = '/assets/backgrounds/shack-mobile.png';
+    } else {
+      backgroundImage = '/assets/backgrounds/shack.png';
+    }
+  }
+
   if (error) {
     return <div className="fixed top-0 left-0 w-full z-50 bg-red-900 bg-opacity-90 flex items-center justify-center text-white text-xl">{error}</div>;
   }
@@ -240,6 +266,7 @@ export default function PlayWalletPage({ wallet, gridConfig: initialGridConfig }
           bnana={0}
         />
       )}
+      {/* DynamicGameRoomCanvas handles mobile/desktop backgrounds automatically based on roomLevel and device */}
       <DynamicGameRoomCanvas
         gridConfig={gridConfig}
         grid={grid}

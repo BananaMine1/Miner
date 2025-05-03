@@ -238,7 +238,7 @@ function Leaderboard() {
                   <tr className="text-yellow-300 text-left sticky top-0 bg-transparent">
                     <th className="py-2 pl-2">Rank</th>
                     <th className="py-2">Player</th>
-                    <th className="py-2 text-right pr-2">$BNANA</th>
+                    <th className="py-2 text-right pr-2">$CRROT</th>
                     <th className="py-2 text-right pr-2">XP</th>
                   </tr>
                 </thead>
@@ -251,7 +251,7 @@ function Leaderboard() {
                       key={player.wallet}
                       className="border-b border-yellow-900 hover:bg-yellow-900/10 transition bg-transparent"
                       tabIndex={0}
-                      aria-label={`Rank ${idx + 4}, ${player.username || player.wallet}, ${player.total_earned?.toFixed(2)} BNANA`}
+                      aria-label={`Rank ${idx + 4}, ${player.username || player.wallet}, ${player.total_earned?.toFixed(2)} CRROT`}
                       style={{ minHeight: '40px', background: 'transparent' }}
                     >
                       <td className="py-2 pl-2 font-bold w-12 bg-transparent">{idx + 4}</td>
@@ -268,7 +268,7 @@ function Leaderboard() {
                           <span className="font-mono text-green-200 ml-2">{player.hashrate} GH/s</span>
                         </div>
                       </td>
-                      <td className="py-2 text-right pr-2 font-mono bg-transparent">{player.total_earned?.toFixed(2)} $BNANA</td>
+                      <td className="py-2 text-right pr-2 font-mono bg-transparent">{player.total_earned?.toFixed(2)} $CRROT</td>
                       <td className="py-2 text-right pr-2 font-mono bg-transparent">{player.xp?.toFixed(2)} XP</td>
                     </tr>
                   ))}

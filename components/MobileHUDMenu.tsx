@@ -67,8 +67,9 @@ export default function MobileHUDMenu({
       {/* Stats */}
       <div className="w-full flex flex-col items-center gap-2 mb-6">
         <div className="text-yellow-300 text-xl font-bold flex items-center gap-2">
-          <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-6 h-6 inline-block" />
-          {bnana.toFixed(2)} $BNANA
+          {/* TODO: Replace with CRROT icon */}
+          {/* <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-6 h-6 inline-block" /> */}
+          {bnana.toFixed(2)} $CRROT
         </div>
         <div className="text-green-200 text-base">🔌 {usedWatts}/{maxWatts}W</div>
         <div className="text-green-200 text-base">💻 {yourHashrate} GH/s</div>

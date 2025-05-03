@@ -41,7 +41,8 @@ export default function MinerDetailsModal({ miner, ownedCount, onBuy, onClose, c
           <div className="flex items-center gap-2 text-sm">
             <span className="w-20 text-yellow-200">Price</span>
             <span className="flex items-center gap-1 text-yellow-300 font-bold">
-              <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-5 h-5 inline-block" />
+              {/* TODO: Replace with CRROT icon */}
+              {/* <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-5 h-5 inline-block" /> */}
               {miner.price} $BNANA
             </span>
           </div>
@@ -95,7 +96,8 @@ export default function MinerDetailsModal({ miner, ownedCount, onBuy, onClose, c
         </div>
         <div className="flex items-center justify-between mt-2">
           <span className="text-lg font-bold text-yellow-200 flex items-center gap-2">
-            <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-6 h-6 inline-block" />
+            {/* TODO: Replace with CRROT icon */}
+            {/* <img src="/assets/ui/bnana.png" alt="$BNANA" className="w-6 h-6 inline-block" /> */}
             Your BNANA: <span className="text-yellow-300">{bnana.toFixed(2)}</span>
           </span>
           <button

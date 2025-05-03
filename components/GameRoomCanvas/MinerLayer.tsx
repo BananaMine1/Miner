@@ -3,8 +3,8 @@ import * as PIXI from 'pixi.js';
 import { Slot, MinerLayerProps } from './types';
 import { loadTexture, unloadTexture } from '../../lib/assetManager';
 
-const MINER_OFFSET_X = 2; // Adjust as needed for perfect centering
-const MINER_OFFSET_Y = 24; // Adjust as needed for perfect centering
+const MINER_OFFSET_X = 3; // Adjust as needed for perfect centering
+const MINER_OFFSET_Y = 8; // Adjust as needed for perfect centering
 
 const MinerLayer: React.FC<MinerLayerProps> = ({
   gameLayer,
@@ -44,7 +44,7 @@ const MinerLayer: React.FC<MinerLayerProps> = ({
         sprite.anchor.set(0.5, 1); // base sits on slot
         sprite.x = slot.screenPos.x + MINER_OFFSET_X;
         sprite.y = slot.screenPos.y + MINER_OFFSET_Y;
-        sprite.scale.set(isMobile && roomLevel === 0 ? 0.17 : 0.25);
+        sprite.scale.set(isMobile && roomLevel === 0 ? 0.05 : 0.10);
         // Set hitArea to the tile polygon
         const points = slot.screenCorners.flatMap(corner => [corner.x, corner.y]);
         sprite.hitArea = new PIXI.Polygon(points);

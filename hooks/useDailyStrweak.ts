@@ -35,7 +35,7 @@ export function useDailyStreak() {
     setCanClaim(false);
 
     // Return reward type/value
-    return 10; // Example: 10 $BNANA
+    return 10; // Example: 10 $CRROT
   };
 
   return { streak, canClaim, claimReward };

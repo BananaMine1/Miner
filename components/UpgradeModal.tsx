@@ -20,7 +20,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({ currentLevel, onConfirm, on
         <div className="mb-2">🏕️ <strong>{nextRoom.name}</strong></div>
         <div className="mb-2">📦 Slots: {nextRoom.maxSlots}</div>
         <div className="mb-2">🔌 Power Limit: {nextRoom.maxPower}W</div>
-        <div className="mb-2">💰 Cost: {nextRoom.upgradeCost} $BNANA</div>
+        <div className="mb-2">💰 Cost: {nextRoom.upgradeCost} $CRROT</div>
 
         <div className="flex justify-end gap-4 mt-6">
           <button

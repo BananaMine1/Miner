@@ -163,7 +163,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       tabIndex={-1}
     >
       <div
-        className="bg-white text-jungleGreen rounded-lg shadow-lg p-8 w-full max-w-sm relative transform transition-transform duration-200 animate-scaleIn pointer-events-auto outline-none"
+        className="bg-[#FFF7E0] text-[#7C4F1D] rounded-2xl border-4 border-yellow-300 shadow-lg p-8 w-full max-w-sm relative transform transition-transform duration-200 animate-scaleIn pointer-events-auto outline-none"
         onClick={e => e.stopPropagation()}
         ref={modalRef}
         tabIndex={0}

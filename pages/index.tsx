@@ -55,7 +55,7 @@ export default function HomePage() {
     <>
       <Head>
         <title>Banana Miners</title>
-        <meta name="description" content="Mine $BNANA in a lush jungle setting." />
+        <meta name="description" content="Mine $CRROT in a lush jungle setting." />
       </Head>
 
       {/* Background music element */}
@@ -75,6 +75,7 @@ export default function HomePage() {
         {/* Main Content Area - Add transform to shift content block higher */}
         <div className="absolute inset-0 flex flex-col items-center justify-center z-10 transform -translate-y-16">
           {/* Hero Image */}
+          {/*
           <div className="relative w-full max-w-[300px] md:max-w-[400px] xl:max-w-[500px] mx-auto pointer-events-none">
             <img
               src={isNight ? '/assets/hero-graphic-night.png' : '/assets/hero-graphic.png'}
@@ -82,11 +83,12 @@ export default function HomePage() {
               className="w-full"
             />
           </div>
+          */}
 
           {/* Start Button */}
           <button 
             onClick={handleStart}
-            className="relative z-20 mt-[-20%] md:mt-[-15%] pointer-events-auto focus:outline-none hover:scale-110 transition duration-300 ease-in-out"
+            className="absolute left-[39.7%] bottom-20 z-20 pointer-events-auto focus:outline-none hover:scale-110 transition duration-300 ease-in-out"
             aria-label="Start Mining"
           >
              <img

@@ -5,10 +5,10 @@ import { GridConfig } from './types';
 // Original image-space grid corners for each room level
 const ROOM_GRID_CORNERS = [
   {
-    topLeft: { x: 485, y: 713 },
-    topRight: { x: 690, y: 638 },
-    bottomLeft: { x: 690, y: 807 },
-    bottomRight: { x: 895, y: 714 },
+    topLeft: { x: 395, y: 765 },
+    topRight: { x: 540, y: 713.5 },
+    bottomLeft: { x: 535, y: 840 },
+    bottomRight: { x: 685, y:780 },
   },
   // Add more room levels as needed
 ];
@@ -16,10 +16,10 @@ const ROOM_GRID_CORNERS = [
 const ROOM_GRID_CORNERS_MOBILE = [
   // Mobile - Shack (adjust these values as needed for placement)
   {
-    topLeft: { x: 300, y: 947 },
-    topRight: { x: 510, y: 855 },
-    bottomLeft: { x: 510, y: 1060 },
-    bottomRight: { x: 727, y: 950 },
+    topLeft: { x: 179, y: 880 },
+    topRight: { x: 328, y: 830 },
+    bottomLeft: { x: 330, y: 970 },
+    bottomRight: { x: 483, y: 898},
   },
   // Add more if you want mobile overrides for other rooms
 ];
